@@ -6,7 +6,7 @@
 These branches which we expect to be permanently available on the repository follow the flow of code changes starting from development until the production.
 
 - `main`: The production branch, if the repository is published, this is the default branch being presented.
-- `development`: All new features and bug fixes should be brought to the development branch. Resolving developer codes conflicts should be done as early as here.
+- `dev`: All new features and bug fixes should be brought to the development branch. Resolving developer codes conflicts should be done as early as here.
 
 ### Temporary branches
 A git branch should start with a category. Pick one of these:
