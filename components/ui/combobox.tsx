@@ -20,8 +20,8 @@ import {
 
 const devices = [
   {
-    value: "OnBoard",
-    label: "OnBoard",
+    value: "Onboard",
+    label: "Onboard",
   },
   {
     value: "handcart",
