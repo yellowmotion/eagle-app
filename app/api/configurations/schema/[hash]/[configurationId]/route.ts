@@ -30,8 +30,6 @@ export async function GET(
 
   binding.url = binding.url.replace('{hash}', params.hash);
 
-  console.log(binding.url);
-
   const res = await fetch(binding.url, { cache: 'force-cache' });
   if (!res.ok) {
     return new NextResponse(null, { status: 500 });
