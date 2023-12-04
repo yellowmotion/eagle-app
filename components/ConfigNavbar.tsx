@@ -11,12 +11,12 @@ function ConfigNavbar() {
   const params = useParams();
   const tabs = [
     { label: "Telemetry", path: "/config/" },
-    { label: "Session", path: "/config/session-config" },
-    { label: "Car", path: "/config/car-config" },
+    { label: "Session", path: "/config/session" },
+    { label: "Car", path: "/config/car" },
   ];
 
   return (
-    <nav className="bg-[#44403C] p-2 rounded-md flex gap-2">
+    <nav className="bg-[#44403C] p-2 rounded-md flex justify-between gap-2">
       {tabs.map((tab) => (
         <Link
           key={tab.path}
@@ -25,7 +25,7 @@ function ConfigNavbar() {
             buttonVariants({
               variant: `${pathname === tab.path ? "reversed" : "secondary"}`,
               size: "default",
-              className: "text-base font-bold w-28"
+              className: "text-base font-bold w-28 grow"
             })
           )}
         >
