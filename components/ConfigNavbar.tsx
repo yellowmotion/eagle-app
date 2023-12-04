@@ -10,7 +10,7 @@ function ConfigNavbar() {
   const pathname = usePathname();
   const params = useParams();
   const tabs = [
-    { label: "Telemetry", path: "/config/" },
+    { label: "Telemetry", path: "/config" },
     { label: "Session", path: "/config/session" },
     { label: "Car", path: "/config/car" },
   ];
