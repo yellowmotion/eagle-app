@@ -2,7 +2,7 @@
 import React from "react";
 import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
-import { Button, buttonVariants } from "./ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 import { cn } from "@/lib/utils";
 

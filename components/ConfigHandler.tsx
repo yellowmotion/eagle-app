@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Icons } from "./Icons";
+import { Icons } from "@/components/Icons";
 import { cn } from "@/lib/utils";
 
 export interface ConfigHandlerProps

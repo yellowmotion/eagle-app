@@ -1,6 +1,6 @@
 export default function DashboardPage() {
   return (
-    <section className="text-white py-20">
+    <section className="text-white py-5">
       <div className="bg-stone-900 w-full h-20 rounded-md p-3 font-semibold flex flex-col items-start">
         <div className="w-full flex items-center justify-start">
           <p className="text-[#F3FF14] pr-2">STATUS</p>
