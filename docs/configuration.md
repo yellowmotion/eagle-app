@@ -26,6 +26,25 @@ To ensure the integrity of the retrieved configuration, the response headers inc
 
 The frontend can use this commit hash to verify and validate the received configuration against the specific version of the JSON schema in the repository.
 
-## Conclusion
+# Dynamic Form Rendering and Schema Retrieval
 
-By following these steps, the frontend can successfully retrieve vehicle configurations from the server, ensuring data integrity and consistency by validating against the corresponding JSON schema commit hash.
+To facilitate dynamic form rendering for modifying configuration data, the frontend can retrieve the corresponding JSON schema by making a GET request to the following URL:
+
+```http
+GET http://{{address}}:{{port}}/api/schema/{{commit-hash}}/{{configuration-id}}
+```
+
+- `{{address}}`: The server address.
+- `{{port}}`: The port number on which the server is running.
+- `{{commit-hash}}`: The commit hash obtained from the previous configuration request.
+- `{{configuration-id}}`: The identifier for the specific configuration.
+
+## Retrieving JSON Schema
+
+The server responds with the JSON schema associated with the requested configuration. This schema provides information about the structure and constraints of the configuration data.
+
+## Dynamic Form Rendering
+
+With the obtained JSON schema, the frontend can dynamically render a form to allow users to modify the configuration data. The form elements correspond to the parameters defined in the schema, and their types are determined by the schema as well.
+
+By combining the configuration retrieval process and dynamic form rendering, the frontend can seamlessly fetch, display, and modify configurations with real-time validation based on the associated JSON schema.
