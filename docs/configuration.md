@@ -48,3 +48,31 @@ The server responds with the JSON schema associated with the requested configura
 With the obtained JSON schema, the frontend can dynamically render a form to allow users to modify the configuration data. The form elements correspond to the parameters defined in the schema, and their types are determined by the schema as well.
 
 By combining the configuration retrieval process and dynamic form rendering, the frontend can seamlessly fetch, display, and modify configurations with real-time validation based on the associated JSON schema.
+
+# Configuration Update Monitoring
+
+To keep track of changes to the configuration after an initial retrieval, the application should periodically make HEAD requests to the following URL:
+
+```http
+HEAD http://{{address}}:{{port}}/api/configurations/content/{vehicle-id}/{device-id}/{configuration-id}
+```
+
+- `{{address}}`: The server address.
+- `{{port}}`: The port number on which the server is running.
+- `{vehicle-id}`: The unique identifier for the vehicle.
+- `{device-id}`: The unique identifier for the device.
+- `{configuration-id}`: The identifier for the specific configuration.
+
+## Checking Last Modification Timestamp
+
+By making periodic HEAD requests, the application can inspect the response headers for the `Last-Modified` field. This field provides the timestamp of the last modification to the configuration.
+
+### Example Response Headers:
+
+```
+Last-Modified: Tue, 05 Dec 2023 12:00:00 GMT
+```
+
+## Implementation with Set Interval
+
+The application can use JavaScript's `setInterval` function to periodically make HEAD requests and compare the last modification timestamp with the previously obtained timestamp. If there is a difference, it indicates that the configuration has been updated.
