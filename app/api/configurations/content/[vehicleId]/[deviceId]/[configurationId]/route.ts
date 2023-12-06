@@ -143,7 +143,7 @@ export async function POST(
       configurationId: params.configurationId,
       configurationVersionHash: versionHash,
       content: content,
-      updatedBy: 'null', // TODO: Change with authenticated user's email
+      updatedBy: 'null@null.nil', // TODO: Change with authenticated user's email
       lastUpdate: new Date().toUTCString(),
     },
     { upsert: true }
