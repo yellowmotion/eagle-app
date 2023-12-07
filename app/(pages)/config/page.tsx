@@ -1,9 +1,35 @@
+"use client";
+import React from "react";
+import axios, { AxiosResponse } from "axios";
+
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import React from "react";
+
+import { useQuery } from "@tanstack/react-query";
 
 const TelemetryConfig = () => {
+  const configContent = useQuery({
+    queryKey: ["telemetry-config", "content"],
+    queryFn: async () => {
+      const response = await axios.get(
+        `/api/configurations/content/fenice-evo/onboard/telemetry-config`
+      );
+      return response;
+    },
+  });
+
+  const configSchema = useQuery({
+    queryKey: ["telemetry-config", "schema"],
+    queryFn: async () => {
+      const response = await axios.get(
+        `/api/configurations/schema/${configContent.data?.headers["x-configurationversionhash"]}/telemetry-config`
+      );
+      return response;
+    },
+    enabled: !!configContent.data,
+  });
+
   return (
     <div className="w-full flex flex-col items-start gap-4 py-8 text-white">
       <div className="w-full flex items-center gap-4">
