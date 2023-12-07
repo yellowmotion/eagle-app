@@ -5,8 +5,9 @@ import GoogleProvider from 'next-auth/providers/google';
 const handler = NextAuth({
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_ID!,
-      clientSecret: process.env.GOOGLE_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      
     }),
   ],
   callbacks: {
@@ -17,8 +18,6 @@ const handler = NextAuth({
         const user = await collection.findOne({
           email: profile?.email,
         });
-        // return true;
-        user;
         return user != null && user.role >= 0;
       } catch {
         return false;
