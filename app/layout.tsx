@@ -23,9 +23,7 @@ export default function RootLayout({
       <html lang="en">
         <body className={cn(inter.className, "bg-black px-4 max-w-md m-auto")}>
           <Providers>
-            <SessionProvider>
-              {children}
-            </SessionProvider>
+            {children}
           </Providers>
         </body>
       </html>
