@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-// import { User } from "next-auth";
-// import { signOut } from "next-auth/react";
+import { User } from "next-auth";
+import { signOut } from "next-auth/react";
 
 import {
   DropdownMenu,
@@ -17,10 +17,13 @@ import { UserAvatar } from "@/components/UserAvatar";
 //   extends React.HTMLAttributes<HTMLDivElement> {
 //   user: Pick<User, "name" | "image" | "email">;
 // }
-// TODO: change to User type from prisma
 export interface UserAccountNavProps
   extends React.HTMLAttributes<HTMLDivElement> {
-  user: { name?: string; image?: string; email?: string };
+  user: {
+    name?: string | null | undefined;
+    image?: string | null | undefined;
+    email?: string | null | undefined;
+  };
 }
 
 export function UserAccountNav({ user }: UserAccountNavProps) {
@@ -58,7 +61,17 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
         <DropdownMenuItem asChild>
           <Link href="/settings">Impostazioni</Link>
         </DropdownMenuItem>
-
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onSelect={(event: any) => {
+            event.preventDefault();
+            signOut({
+              callbackUrl: `${window.location.origin}/sign-in`,
+            });
+          }}
+        >
+          Sign out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
