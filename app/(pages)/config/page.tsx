@@ -8,6 +8,8 @@ import { Slider } from "@/components/ui/slider";
 
 import { useQuery } from "@tanstack/react-query";
 
+import { getObjectByRef } from "@/lib/utils";
+
 const TelemetryConfig = () => {
   const configContent = useQuery({
     queryKey: ["telemetry-config", "content"],
@@ -32,43 +34,27 @@ const TelemetryConfig = () => {
 
   return (
     <div className="w-full flex flex-col items-start gap-4 py-8 text-white">
-      <div className="w-full flex items-center gap-4">
-        <Checkbox />
-        <p>Camera Enable</p>
-      </div>
-      <div className="w-full flex items-center gap-4">
-        <Checkbox />
-        <p>Generate CSV</p>
-      </div>
-      <div className="w-full flex justify-between items-center gap-4">
-        <Button variant="grey" className="grow">
-          Add CAN device
-        </Button>
-        <Button variant="grey" className="grow">
-          Add GPS device
-        </Button>
-      </div>
-      <h3 className="text-2xl font-bold">Connection</h3>
-      <div className="flex items-center gap-4">
-        <Checkbox />
-        <p>Enabled</p>
-      </div>
-      <div className="w-full flex items-center gap-4">
-        <Checkbox />
-        <p>Skip same can payload</p>
-      </div>
-      <div className="w-full flex flex-col items-start gap-3">
-        <p>Downsample mps</p>
-        <Slider defaultValue={[100]} max={200} step={1} />
-      </div>
-      <div className="w-full flex flex-col items-start gap-3">
-        <p>Send rate [ms]</p>
-        <Slider defaultValue={[500]} max={2000} step={1} />
-      </div>
-      <div className="flex items-center gap-4">
-        <Checkbox />
-        <p>Send sensor Data</p>
-      </div>
+      {configSchema.data?.data.$ref && (
+        <div>
+          {Object.entries(
+            getObjectByRef(
+              configSchema.data?.data,
+              configSchema.data?.data.$ref
+            ).properties
+          ).map(([key, value]) => (
+            <div key={key} className="w-full flex items-center gap-4">
+              {(value as any).type === "boolean" ? (
+                <>
+                  <p>{key}</p>
+                  <Checkbox />
+                </>
+              ) : (
+                <p>{key}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
