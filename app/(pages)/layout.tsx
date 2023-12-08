@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { ConfigHandler } from "@/components/ConfigHandler";
 import ConfigNavbar from "@/components/ConfigNavbar";
 import { UserAccountNav } from "@/components/UserAccountNav";
@@ -16,7 +17,11 @@ export default async function PagesLayout({
   children: React.ReactNode;
 }>) {
   const session = await getAuthSession();
-  
+
+  if (!session) {
+    redirect("/sign-in");
+  }
+
   return (
     <div className="min-h-[svh] pt-5">
       <div className="w-full flex justify-between">
