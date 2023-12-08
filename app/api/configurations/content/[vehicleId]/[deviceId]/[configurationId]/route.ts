@@ -33,6 +33,7 @@ export async function GET(
   const config = plainToInstance(ConfigurationMongoContent, result);
   const errors = await validate(config);
   if (errors.length > 0) {
+    errors.forEach(console.error)
     return new NextResponse(null, { status: 500 });
   }
 
@@ -132,8 +133,6 @@ export async function POST(
 
   const schema = await res.json();
 
-  // const ajv = new Ajv();
-  // const isValidSchema = ajv.validate(schema, content);
   const validator = new Validator();
   const isValidSchema = validator.validate(content, schema);
 
@@ -149,8 +148,12 @@ export async function POST(
       configurationId: params.configurationId,
     },
     {
+      vehicleId: params.vehicleId,
+      deviceId: params.deviceId,
+      configurationId: params.configurationId,
+      configurationVersionHash: versionHash,
       content: content,
-      updatedBy: 'null', // TODO: Change with authenticated user's email
+      updatedBy: 'null@null.nil', // TODO: Change with authenticated user's email
       lastUpdate: new Date().toUTCString(),
     },
     { upsert: true }
