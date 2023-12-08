@@ -8,6 +8,65 @@ import { SchemaBindingMongoContent } from '@/app/api/configurations/schema/[hash
 import { Validator } from 'jsonschema';
 import { getJWT } from '@/lib/auth';
 
+/**
+ * @swagger
+ * /api/configurations/content/{vehicleId}/{deviceId}/{configurationId}:
+ *   get:
+ *     summary: Get configuration content
+ *     description: Get configuration content
+ *     tags: [Configurations]
+ *     parameters:
+ *       - in: vehicleId
+ *         name: vehicleId
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: deviceId
+ *         name: deviceId
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: configurationId
+ *         name: configurationId
+ *         schema:
+ *           type: string
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Ok. Response correctly sent the configuration content
+ *         headers:
+ *           Content-Type:
+ *             description: Content type of the response
+ *             value: application/json
+ *             schema:
+ *               type: string
+ *           Last-Modified:
+ *             description: Last modification date of the configuration
+ *             schema:
+ *               type: string
+ *           X-VehicleId:
+ *             description: The vehicle id of the configuration
+ *             schema:
+ *               type: string
+ *           X-DeviceId:
+ *             description: The device id of the configuration
+ *             schema:
+ *               type: string
+ *           X-ConfigurationId:
+ *             description: The configuration id searched
+ *             schema:
+ *               type: string
+ *           X-ConfigurationVersionHash:
+ *             description: Configuration has versioning. This is the hash of the version of the configuration
+ *             schema:
+ *               type: string
+ *       401:
+ *         description: Unauthorized. Probably missing or invalid JWT token
+ *       404:
+ *         description: Not found. Configuration cannot be found
+ *       500:
+ *         description: Internal Server Error. Something went wrong on the server side
+ */
 export async function GET(
   req: NextRequest,
   { params }: { params: RouteParams }
