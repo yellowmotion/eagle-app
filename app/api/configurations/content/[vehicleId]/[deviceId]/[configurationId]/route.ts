@@ -109,6 +109,60 @@ export async function GET(
   });
 }
 
+/**
+ * @swagger
+ * /api/configurations/content/{vehicleId}/{deviceId}/{configurationId}:
+ *   head:
+ *     summary: Fetch last modification date of the configuration
+ *     description: HEAD request must be used for checking if the configuration has been modified since the last time it has been downloaded with GET method. If the configuration has been modified, the GET method must be used to download the new version of the configuration, if user accepts it.
+ *     tags: [Configurations]
+ *     parameters:
+ *       - in: path
+ *         name: vehicleId
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: path
+ *         name: deviceId
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: path
+ *         name: configurationId
+ *         schema:
+ *           type: string
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Ok. Response correctly sent the configuration content
+ *         headers:
+ *           Last-Modified:
+ *             description: Last modification date of the configuration
+ *             schema:
+ *               type: string
+ *           X-VehicleId:
+ *             description: The vehicle id of the configuration
+ *             schema:
+ *               type: string
+ *           X-DeviceId:
+ *             description: The device id of the configuration
+ *             schema:
+ *               type: string
+ *           X-ConfigurationId:
+ *             description: The configuration id searched
+ *             schema:
+ *               type: string
+ *           X-ConfigurationVersionHash:
+ *             description: Configuration has versioning. This is the hash of the version of the configuration
+ *             schema:
+ *               type: string
+ *       401:
+ *         description: Unauthorized. Probably missing or invalid JWT token
+ *       404:
+ *         description: Not found. Configuration cannot be found
+ *       500:
+ *         description: Internal Server Error. Something went wrong on the server side
+ */
 export async function HEAD(
   req: NextRequest,
   { params }: { params: RouteParams }
