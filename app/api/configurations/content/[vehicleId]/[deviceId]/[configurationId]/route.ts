@@ -203,6 +203,46 @@ export async function HEAD(
   });
 }
 
+/**
+ * @swagger
+ * /api/configurations/content/{vehicleId}/{deviceId}/{configurationId}:
+ *   post:
+ *     summary: Save configuration on the cloud
+ *     description: After the configuration has been validated against the schema, it can be saved on the cloud. The configuration will overwrite the previous version of the configuration.
+ *     tags: [Configurations]
+ *     parameters:
+ *       - in: path
+ *         name: vehicleId
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: path
+ *         name: deviceId
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: path
+ *         name: configurationId
+ *         schema:
+ *           type: string
+ *         required: true
+ *     requestBody:
+ *       description: Body must contain a valid configuration, that will be validated against the schema. Must be a valid JSON object.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           description: A valid JSON object
+ *           example: { "key": "value" }
+ *     responses:
+ *       200:
+ *         description: Ok. Configuration has been saved
+ *       401:
+ *         description: Unauthorized. Probably missing or invalid JWT token
+ *       404:
+ *         description: Not found. Configuration cannot be found
+ *       500:
+ *         description: Internal Server Error. Something went wrong on the server side
+ */
 export async function POST(
   req: NextRequest,
   { params }: { params: RouteParams }
