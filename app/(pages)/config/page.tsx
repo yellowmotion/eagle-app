@@ -5,14 +5,30 @@ import axios, { AxiosResponse } from "axios";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
+import Render from "@/components/Render";
 
 import { useQuery } from "@tanstack/react-query";
+import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { DevTool } from "@hookform/devtools";
 
 import { schemaResolve } from "@/lib/utils";
+import { jsonToZod } from "@/lib/schema";
+
+import * as z from "zod";
 
 const TelemetryConfig = () => {
   const [schema, setSchema] = React.useState<any>({});
   const [content, setContent] = React.useState<any>({});
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    control,
+    formState: { errors },
+  } = useForm<any>();
+  const onSubmit: SubmitHandler<any> = (data) => console.log(data);
 
   const configContent = useQuery({
     queryKey: ["telemetry-config", "content"],
@@ -49,74 +65,99 @@ const TelemetryConfig = () => {
     configContent.isSuccess,
   ]);
 
-  return (
-    <div className="w-full flex flex-col items-start gap-4 py-8 text-white">
-      {schema.properties && (
-        <div className="w-full flex flex-col gap-4">
-          {Object.entries(schema.properties).map(([key, value]) => (
-            <div key={key} className="w-full flex items-center">
-              {(() => {
-                switch ((value as any).type) {
-                  case "string":
-                    return (
-                      <div className="w-full py-2">
-                        <p className="capitalize">{key}</p>
-                        <input
-                          type="text"
-                          className="w-full rounded-md bg-gray-800 text-white p-2"
-                          placeholder={content[key] as string}
-                        />
-                      </div>
-                    );
-                  case "integer":
-                    return (
-                      <div className="w-full py-2">
-                        {key} {content[key]}
-                      </div>
-                    );
-                  case "boolean":
-                    return (
-                      <div className="w-full flex gap-4 items-center">
-                        <Checkbox checked={content[key]} />
-                        {key}
-                      </div>
-                    );
-                  case "object":
-                    return (
-                      <div className="w-full py-2">
-                        <h3 className="font-medium text-2xl">
-                          {(value as any).title as string}
-                        </h3>
-                        {Object.entries((value as any).properties).map(
-                          ([subkey, subvalue]) => (
-                            <div key={subkey}>
-                              {(() => (
-                                <div className="flex gap-4">
-                                  <p>{subkey}</p>
-                                  <p>{content[key][subkey]}</p>
-                                </div>
-                              ))()}
-                            </div>
-                          )
-                        )}
-                      </div>
-                    );
-                  case "array":
-                    return (
-                      <div className="w-full py-2">
-                        <h3>{key} (array)</h3>
-                      </div>
-                    );
-                  default:
-                    return <p>{key}</p>;
-                }
-              })()}
-            </div>
-          ))}
-        </div>
-      )}
+  const render = (configSchema: any, configContent: any, key: string = "") => {
+    const label = key.split("/").pop();
+    switch (configSchema.type) {
+      case "string":
+        return (
+          <div className="w-full py-2 flex flex-col items-start gap-2">
+            <p className="capitalize">{label}</p>
+            <input
+              type="text"
+              className="w-full rounded-md bg-gray-800 text-white p-2"
+              placeholder={configContent as string}
+              {...register(key)}
+              defaultValue={configContent}
+            />
+          </div>
+        );
+      case "integer":
+        return (
+          <div className="w-full py-2">
+            {label} {configContent}
+          </div>
+        );
+      case "boolean":
+        return (
+          <div className="w-full flex gap-4 items-center">
+            <Controller
+              name={key}
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  {...field}
+                  checked={configContent !== undefined ? configContent : false}
+                  onCheckedChange={(checked) => {
+                    configContent = checked;
+                    setValue(key, configContent);
+                  }}
+                />
+              )}
+            />
+            {label}
+          </div>
+        );
 
-      <p>{JSON.stringify(configContent.data?.data, null, 2)}</p>
+      case "object":
+        return renderObjectField(configSchema, configContent, key);
+      case "array":
+        return (
+          <div>
+            <p>{key}</p>
+            <p>Array</p>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const renderObjectField = (
+    configSchema: any,
+    configContent: any,
+    key: string = ""
+  ) => {
+    return (
+      <div className="w-full py-4">
+        <h3 className="font-medium text-xl">{configSchema.title}</h3>
+        {Object.entries(configSchema.properties).map(([subkey, value]) => (
+          <React.Fragment key={subkey}>
+            {render(
+              value,
+              configContent[subkey],
+              key.length > 0 ? `${key}/${subkey}` : subkey
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="w-full flex flex-col items-start gap-4 py-8 pb-20 text-white">
+      {schema.properties && (
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="w-full flex flex-col gap-4"
+        >
+          {render(schema, content)}
+          <input type="submit" />
+          <DevTool control={control} />
+        </form>
+      )}
+      {/* <React.Suspense fallback={<p>Loading...</p>}>
+        <Render schema={schema} content={content} />
+      </React.Suspense> */}
     </div>
   );
 };
