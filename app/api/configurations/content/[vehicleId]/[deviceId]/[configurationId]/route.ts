@@ -16,17 +16,17 @@ import { getJWT } from '@/lib/auth';
  *     description: Get configuration content
  *     tags: [Configurations]
  *     parameters:
- *       - in: vehicleId
+ *       - in: path
  *         name: vehicleId
  *         schema:
  *           type: string
  *         required: true
- *       - in: deviceId
+ *       - in: path
  *         name: deviceId
  *         schema:
  *           type: string
  *         required: true
- *       - in: configurationId
+ *       - in: path
  *         name: configurationId
  *         schema:
  *           type: string
