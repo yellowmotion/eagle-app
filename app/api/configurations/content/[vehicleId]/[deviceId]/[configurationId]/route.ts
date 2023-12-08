@@ -6,12 +6,16 @@ import { plainToInstance } from 'class-transformer';
 import { ConfigurationMongoContent, RouteParams } from './types';
 import { SchemaBindingMongoContent } from '@/app/api/configurations/schema/[hash]/[configurationId]/types';
 import { Validator } from 'jsonschema';
+import { getJWT } from '@/lib/auth';
 
 export async function GET(
-  _: NextRequest,
+  req: NextRequest,
   { params }: { params: RouteParams }
 ): Promise<NextResponse> {
-  // TODO: Implement authentication
+  const token = await getJWT(req);
+  if (!token) {
+    return new NextResponse(null, { status: 401 });
+  }
 
   const db = await getDatabase();
   const collection = await db.collection('configurations');
@@ -46,10 +50,13 @@ export async function GET(
 }
 
 export async function HEAD(
-  _: NextRequest,
+  req: NextRequest,
   { params }: { params: RouteParams }
 ): Promise<NextResponse> {
-  // TODO: Implement authentication
+  const token = await getJWT(req);
+  if (!token) {
+    return new NextResponse(null, { status: 401 });
+  }
 
   const db = await getDatabase();
   const collection = await db.collection('configurations');
@@ -86,7 +93,10 @@ export async function POST(
   req: NextRequest,
   { params }: { params: RouteParams }
 ) {
-  // TODO: Implement authentication
+  const token = await getJWT(req);
+  if (!token) {
+    return new NextResponse(null, { status: 401 });
+  }
 
   const content = await req.json();
   const versionHash = req.headers.get('X-ConfigurationVersionHash');

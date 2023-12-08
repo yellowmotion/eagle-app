@@ -47,16 +47,16 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     session: async ({ session, token, user }) => {
-      // session.accessToken = token.accessToken
-      // session.user.id = token.id
-      console.log(token);
       return session;
     },
   },
   events: {
-    signIn: async (message) => console.log(`[SignIn] ${message}`),
-    signOut: async (message) => console.log(`[SignOut] ${message}`),
-    session: async (message) => console.log(`[Session] ${message}`),
+    signIn: async (message) =>
+      console.log(`[SignIn] ${JSON.stringify(message)}`),
+    signOut: async (message) =>
+      console.log(`[SignOut] ${JSON.stringify(message)}`),
+    session: async (message) =>
+      console.log(`[Session] ${JSON.stringify(message)}`),
   },
 
   secret: process.env.NEXTAUTH_SECRET,
@@ -70,7 +70,6 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: '/sign-in',
   },
-  useSecureCookies: true,
 };
 
 export const getAuthSession = () => getServerSession(authOptions);
