@@ -1,14 +1,15 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 
+import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { DevTool } from "@hookform/devtools";
-import * as z from "zod";
+import axios, { AxiosResponse } from "axios";
+import { useQuery } from "@tanstack/react-query";
 
 import { jsonToZod } from "@/lib/schema";
+import { schemaResolve } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -19,21 +20,67 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const Render = ({ schema, content }: { schema: any; content: any }) => {
-  const form = useForm({
-    defaultValues: content,
+import { ConfigHandler } from "@/components/ConfigHandler";
+
+const Render = ({
+  vehicleId,
+  deviceId,
+  configurationId,
+}: {
+  vehicleId: string;
+  deviceId: string;
+  configurationId: string;
+}) => {
+  const form = useForm();
+
+  const [schema, setSchema] = React.useState<any>({});
+  const [content, setContent] = React.useState<any>({});
+
+  const configContent = useQuery({
+    queryKey: ["telemetry-config", "content"],
+    queryFn: async () => {
+      const response = await axios.get(
+        `/api/configurations/content/${vehicleId}/${deviceId}/${configurationId}`
+      );
+      return response;
+    },
   });
 
+  const configSchema = useQuery({
+    queryKey: ["telemetry-config", "schema"],
+    queryFn: async () => {
+      const response = await axios.get(
+        `/api/configurations/schema/${configContent.data?.headers["x-configurationversionhash"]}/${configurationId}`
+      );
+      return response;
+    },
+    enabled: !!configContent.data,
+  });
+
+  useEffect(() => {
+    if (configSchema.data && configSchema.isSuccess) {
+      setSchema(schemaResolve(configSchema.data.data, configSchema.data.data));
+    }
+    if (configContent.data && configContent.isSuccess) {
+      setContent(configContent.data.data);
+    }
+  }, [
+    configSchema.data,
+    configSchema.isSuccess,
+    configContent.data,
+    configContent.isSuccess,
+  ]);
 
   function onSubmit(values: any) {
     console.log("INVIATO");
     console.log(form.getValues());
   }
 
-  const render = (configSchema: any, configContent: any, key: string = "") => {
+  const render = (configSchema: any, configContent: any, key: string) => {
+    const label = key.split("/").pop();
     switch (configSchema.type) {
       case "string":
         return (
@@ -42,18 +89,16 @@ const Render = ({ schema, content }: { schema: any; content: any }) => {
             name={key}
             render={({ field }) => (
               <FormItem className="py-2">
-                <FormLabel>{key}</FormLabel>
+                <FormLabel className="capitalize">{label}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder={configContent as string}
                     {...field}
-                    className="text-black"
+                    className="text-black text-base"
                     defaultValue={configContent}
                   />
                 </FormControl>
-                <FormDescription>
-                {configContent}
-                </FormDescription>
+                {/* <FormDescription>{configContent}</FormDescription> */}
                 <FormMessage />
               </FormItem>
             )}
@@ -65,20 +110,17 @@ const Render = ({ schema, content }: { schema: any; content: any }) => {
             control={form.control}
             name={key}
             render={({ field }) => (
-              <FormItem className="flex gap-8 items-center p-2">
-                <FormLabel className="text-lg capitalize">{key}</FormLabel>
+              <FormItem className="flex gap-8 items-center py-2">
+                <FormLabel className="text-lg capitalize">{label}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    // placeholder={configContent as number}
+                    placeholder={configContent}
                     {...field}
-                    className="text-black"
-                    defaultValue={configContent}
+                    className="text-black text-base"
                   />
                 </FormControl>
-                <FormDescription>
-                  {configContent}
-                </FormDescription>
+                {/* <FormDescription>{configContent}</FormDescription> */}
                 <FormMessage />
               </FormItem>
             )}
@@ -91,7 +133,6 @@ const Render = ({ schema, content }: { schema: any; content: any }) => {
             name={key}
             render={({ field }) => (
               <FormItem className="flex gap-8 items-center p-2">
-                <FormLabel className="text-lg capitalize">{key}</FormLabel>
                 <FormControl>
                   <Checkbox
                     {...field}
@@ -104,9 +145,7 @@ const Render = ({ schema, content }: { schema: any; content: any }) => {
                     }}
                   />
                 </FormControl>
-                {/* <FormDescription>
-                  This is your public display name.
-                </FormDescription> */}
+                <FormLabel className="text-lg capitalize">{label}</FormLabel>
                 <FormMessage />
               </FormItem>
             )}
@@ -148,15 +187,22 @@ const Render = ({ schema, content }: { schema: any; content: any }) => {
     );
   };
 
+  if (!schema || !content) return null;
+
   return (
-    <Form {...form}>
-      <p>RENDER</p>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
-        {render(schema, content)}
-        <input type="submit" />
-        <DevTool control={form.control} />
-      </form>
-    </Form>
+    <>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8 w-full"
+        >
+          {render(schema, content, "")}
+        </form>
+      </Form>
+      <div className="fixed bottom-2 left-0 right-0 max-w-md p-2 m-auto">
+        <ConfigHandler onSendClick={form.handleSubmit(onSubmit)} onRefreshClick={configContent.refetch}/>
+      </div>
+    </>
   );
 };
 

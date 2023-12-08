@@ -24,6 +24,7 @@ export const schemaResolve = (schema: any, root: any) => {
     return refObj;
   } else if (schema.type === "string") return schema;
   else if (schema.type === "integer") return schema;
+  else if (schema.type === "number") return schema;
   else if (schema.type === "boolean") return schema;
   else if (schema.type === "array") {
     schema.items = schemaResolve(schema.items, root);

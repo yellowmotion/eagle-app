@@ -25,7 +25,7 @@ const Providers: FC<LayoutProps> = ({ children }) => {
       {children}
       {/* </SessionProvider> */}
       <React.Suspense fallback={null}>
-        <ReactQueryDevtoolsProduction />
+        {/* <ReactQueryDevtoolsProduction /> */}
       </React.Suspense>
     </QueryClientProvider>
   );
