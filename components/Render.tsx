@@ -8,7 +8,7 @@ import axios, { AxiosResponse } from "axios";
 import { useQuery } from "@tanstack/react-query";
 
 import { jsonToZod } from "@/lib/schema";
-import { schemaResolve, contentDefaultValues } from "@/lib/utils";
+import { schemaResolve, contentDefaultValues, groupKeys } from "@/lib/utils";
 
 import {
   Form,
@@ -79,7 +79,8 @@ const Render = ({
 
   function onSubmit(values: any) {
     console.log("INVIATO");
-    console.log(form.getValues());
+    // console.log(values);
+    console.log(groupKeys(values));
   }
 
   const render = (configSchema: any, configContent: any, key: string) => {
@@ -158,12 +159,7 @@ const Render = ({
       case "object":
         return renderObjectField(configSchema, configContent, key);
       case "array":
-        return (
-          <div>
-            <p>{key}</p>
-            <p>Array</p>
-          </div>
-        );
+        return renderArrayField(configSchema, configContent, key);
       default:
         return null;
     }
@@ -189,6 +185,28 @@ const Render = ({
       </div>
     );
   };
+
+  const renderArrayField = (
+    configSchema: any,
+    configContent: any,
+    key: string
+  ) => {
+    return (
+      <div className="w-full py-4">
+        ARRAY:
+        {/* <h3 className="font-medium text-xl">{configSchema.title}</h3> */}
+        {configContent.map((item: any, index: number) => (
+          <div key={index} className="py-2">
+            {render(
+              configSchema.items,
+              item,
+              key.length > 0 ? `${key}/${index}` : `${index}`
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (!schema || !content) return null;
 
