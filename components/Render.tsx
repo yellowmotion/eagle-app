@@ -40,7 +40,7 @@ const Render = ({
   const [content, setContent] = React.useState<any>({});
 
   const configContent = useQuery({
-    queryKey: ["telemetry-config", "content"],
+    queryKey: [configurationId, "content"],
     queryFn: async () => {
       const response = await axios.get(
         `/api/configurations/content/${vehicleId}/${deviceId}/${configurationId}`
@@ -50,7 +50,7 @@ const Render = ({
   });
 
   const configSchema = useQuery({
-    queryKey: ["telemetry-config", "schema"],
+    queryKey: [configurationId, "schema"],
     queryFn: async () => {
       const response = await axios.get(
         `/api/configurations/schema/${configContent.data?.headers["x-configurationversionhash"]}/${configurationId}`
@@ -181,6 +181,7 @@ const Render = ({
               configContent[subkey],
               key.length > 0 ? `${key}/${subkey}` : subkey
             )}
+
           </React.Fragment>
         ))}
       </div>
@@ -188,6 +189,7 @@ const Render = ({
   };
 
   if (!schema || !content) return null;
+
 
   return (
     <>
