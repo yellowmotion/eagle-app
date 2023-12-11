@@ -8,7 +8,7 @@ import axios, { AxiosResponse } from "axios";
 import { useQuery } from "@tanstack/react-query";
 
 import { jsonToZod } from "@/lib/schema";
-import { schemaResolve } from "@/lib/utils";
+import { schemaResolve, contentDefaultValues } from "@/lib/utils";
 
 import {
   Form,
@@ -34,10 +34,11 @@ const Render = ({
   deviceId: string;
   configurationId: string;
 }) => {
-  const form = useForm();
-
   const [schema, setSchema] = React.useState<any>({});
   const [content, setContent] = React.useState<any>({});
+  const form = useForm({
+    defaultValues: contentDefaultValues(schema, content),
+  });
 
   const configContent = useQuery({
     queryKey: [configurationId, "content"],
@@ -66,12 +67,14 @@ const Render = ({
     }
     if (configContent.data && configContent.isSuccess) {
       setContent(configContent.data.data);
+      form.reset(contentDefaultValues(schema, configContent.data.data));
     }
   }, [
     configSchema.data,
     configSchema.isSuccess,
     configContent.data,
     configContent.isSuccess,
+    form, schema
   ]);
 
   function onSubmit(values: any) {
@@ -181,7 +184,6 @@ const Render = ({
               configContent[subkey],
               key.length > 0 ? `${key}/${subkey}` : subkey
             )}
-
           </React.Fragment>
         ))}
       </div>
@@ -189,7 +191,6 @@ const Render = ({
   };
 
   if (!schema || !content) return null;
-
 
   return (
     <>
@@ -202,7 +203,10 @@ const Render = ({
         </form>
       </Form>
       <div className="fixed bottom-2 left-0 right-0 max-w-md p-2 m-auto">
-        <ConfigHandler onSendClick={form.handleSubmit(onSubmit)} onRefreshClick={configContent.refetch}/>
+        <ConfigHandler
+          onSendClick={form.handleSubmit(onSubmit)}
+          onRefreshClick={configContent.refetch}
+        />
       </div>
     </>
   );

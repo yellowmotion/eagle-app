@@ -38,3 +38,35 @@ export const schemaResolve = (schema: any, root: any) => {
     console.log("[SCHEMA] ERRORE: ", schema);
   }
 };
+
+const flattenObject = (obj: any, content: any, parentKey: string): any =>
+  Object.keys(obj).reduce((acc, key) => {
+    const currentKey = parentKey ? `${parentKey}/${key}` : key;
+
+    if (obj[key].type === "object") {
+      return {
+        ...acc,
+        ...flattenObject(obj[key].properties, content[key], currentKey),
+      };
+    } else if (obj[key].type === "array") {
+      return {
+        ...acc,
+        // ...flattenObject(obj[key].items.properties, content[key], currentKey),
+      };
+    } else {
+      return {
+        ...acc,
+        [currentKey]: content[key],
+      };
+    }
+  }, {});
+
+export const contentDefaultValues = (schema: any, content: any): any => {
+  if (!schema.properties) {
+    return;
+  }
+  const computedSchema = schemaResolve(schema, schema);
+
+  const flatted = flattenObject(computedSchema["properties"], content, "");
+  return flatted;
+};
