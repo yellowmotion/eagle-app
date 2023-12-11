@@ -5,7 +5,7 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import axios, { AxiosResponse } from "axios";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 import { jsonToZod } from "@/lib/schema";
 import { schemaResolve, contentDefaultValues, groupKeys } from "@/lib/utils";
@@ -61,6 +61,22 @@ const Render = ({
     enabled: !!configContent.data,
   });
 
+  const mutation = useMutation({
+    mutationFn: async (values: any) => {
+      const response = await axios.post(
+        `/api/configurations/content/${vehicleId}/${deviceId}/${configurationId}`,
+        values,
+        {
+          headers: {
+            "X-ConfigurationVersionHash":
+              configContent.data?.headers["x-configurationversionhash"],
+          },
+        }
+      );
+      return response;
+    },
+  });
+
   useEffect(() => {
     if (configSchema.data && configSchema.isSuccess) {
       setSchema(schemaResolve(configSchema.data.data, configSchema.data.data));
@@ -74,13 +90,15 @@ const Render = ({
     configSchema.isSuccess,
     configContent.data,
     configContent.isSuccess,
-    form, schema
+    form,
+    schema,
   ]);
 
   function onSubmit(values: any) {
     console.log("INVIATO");
-    // console.log(values);
-    console.log(groupKeys(values));
+    console.log(values);
+    mutation.mutate(groupKeys(values));
+    console.log(mutation);
   }
 
   const render = (configSchema: any, configContent: any, key: string) => {
@@ -206,7 +224,7 @@ const Render = ({
         ))}
       </div>
     );
-  }
+  };
 
   if (!schema || !content) return null;
 
