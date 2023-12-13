@@ -4,10 +4,13 @@ import { Icons } from "@/components/Icons";
 import { cn } from "@/lib/utils";
 
 export interface ConfigHandlerProps
-  extends React.HTMLAttributes<HTMLDivElement> {}
+  extends React.HTMLAttributes<HTMLDivElement> {
+  onRefreshClick: () => void;
+  onSendClick: () => void;
+}
 
 const ConfigHandler = React.forwardRef<HTMLDivElement, ConfigHandlerProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, onRefreshClick, onSendClick, ...props }, ref) => {
     return (
       <div
         className={cn(
@@ -16,11 +19,11 @@ const ConfigHandler = React.forwardRef<HTMLDivElement, ConfigHandlerProps>(
         )}
         {...props}
       >
-        <Button variant="grey" className="w-32 grow">
+        <Button variant="grey" className="w-32 grow" onClick={onRefreshClick}>
           <Icons.refresh className="h-4 w-4 mr-2" />
           Refresh
         </Button>
-        <Button variant="default" className="w-32 grow">
+        <Button variant="default" className="w-32 grow" onClick={onSendClick}>
           <Icons.upload className="h-4 w-4 mr-2 stroke-2" />
           Send
         </Button>

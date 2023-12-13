@@ -15,9 +15,6 @@ export default function ConfigLayout({
     <div className="pt-5">
       <ConfigNavbar />
       {children}
-      <div className="fixed bottom-2 left-0 right-0 max-w-md m-auto">
-        <ConfigHandler />
-      </div>
     </div>
   );
 }
