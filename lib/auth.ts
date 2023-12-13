@@ -1,9 +1,9 @@
-import { NextAuthOptions, getServerSession, Session, User } from "next-auth";
+import { NextAuthOptions, getServerSession} from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-import { getDatabase } from '@/lib/db';
-import { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { getDatabase } from "@/lib/db";
+import { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -16,7 +16,7 @@ export const authOptions: NextAuthOptions = {
     signIn: async ({ profile }) => {
       try {
         const db = await getDatabase();
-        const collection = db.collection('roles');
+        const collection = db.collection("roles");
         const user = await collection.findOne({
           email: profile?.email,
         });
@@ -25,11 +25,11 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
     },
-    jwt: async ({ token, profile, account }) => {
+    jwt: async ({ token, user, account, profile }) => {
       // Just done the login
-      if (account) {
+      if (profile && account) {
         const db = await getDatabase();
-        const collection = db.collection('roles');
+        const collection = db.collection("roles");
         const user = await collection.findOne({
           email: profile?.email,
         });
@@ -39,7 +39,8 @@ export const authOptions: NextAuthOptions = {
         }
 
         return {
-          email: user.email,
+          ...token,
+          // email: user.email, // è già presente nel token
           role: user.role,
         };
       }
@@ -47,6 +48,10 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     session: async ({ session, token, user }) => {
+      if (session.user) {
+        session.user.role = token.role;
+        return session;
+      }
       return session;
     },
   },
@@ -61,14 +66,14 @@ export const authOptions: NextAuthOptions = {
 
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
     maxAge: 24 * 60 * 60, // 1 day
   },
   jwt: {
     maxAge: 24 * 60 * 60,
   },
   pages: {
-    signIn: '/sign-in',
+    signIn: "/sign-in",
   },
 };
 
