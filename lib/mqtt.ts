@@ -36,22 +36,12 @@ export function parseMessage(payload: Uint8Array, network: string, descriptor: R
 }
 
 export async function connect(ctx: DashboardContextContent) {
-  console.log("connecting...")
-  const result = await Promise.all([
-    async () => {
-      console.log("requesting protos")
-      const protoFiles = await fetchProtos()
-      ctx.primary_proto_file = protoFiles['primary']
-      ctx.secondary_proto_file = protoFiles['secondary']
-      ctx.primary_proto_root = rootFromProtoFile(ctx.primary_proto_file)
-      ctx.secondary_proto_root = rootFromProtoFile(ctx.secondary_proto_file)
-      console.log("proto ok")
-    },
-    async () => {
-      ctx.client = await mqtt.connectAsync(process.env.MQTT_URL!)
-      console.log("client ok")
-    }
-  ])
+  const protoFiles = await fetchProtos()
+  ctx.primary_proto_file = protoFiles['primary']
+  ctx.secondary_proto_file = protoFiles['secondary']
+  ctx.primary_proto_root = rootFromProtoFile(ctx.primary_proto_file)
+  ctx.secondary_proto_root = rootFromProtoFile(ctx.secondary_proto_file)
+  ctx.client = mqtt.connect(process.env.MQTT_URL!)
 
   ctx.client?.on("connect", () => {
     console.log("connected")

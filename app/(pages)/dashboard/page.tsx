@@ -1,11 +1,22 @@
+import { DashboardContextContent } from "@/components/DashboardContext";
 import MqttConnection from "@/components/Mqtt";
 import Protobuf from "@/components/Protobuf";
+import { connect } from "@/lib/mqtt";
 
 export default function DashboardPage() {
+
+  const ctx: DashboardContextContent = {
+    client: null,
+    primary_proto_file: null,
+    primary_proto_root: null,
+    secondary_proto_file: null,
+    secondary_proto_root: null
+  }
+
+  connect(ctx)
+
   return (
     <section className="text-white py-5">
-      <Protobuf/>
-      <MqttConnection />
       <div className="bg-stone-900 w-full h-20 rounded-md p-3 font-semibold flex flex-col items-start">
         <div className="w-full flex items-center justify-start">
           <p className="text-[#F3FF14] pr-2">STATUS</p>
