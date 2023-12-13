@@ -55,14 +55,14 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  events: {
-    signIn: async (message) =>
-      console.log(`[SignIn] ${JSON.stringify(message)}`),
-    signOut: async (message) =>
-      console.log(`[SignOut] ${JSON.stringify(message)}`),
-    session: async (message) =>
-      console.log(`[Session] ${JSON.stringify(message)}`),
-  },
+  // events: {
+  //   signIn: async (message) =>
+  //     console.log(`[SignIn] ${JSON.stringify(message)}`),
+  //   signOut: async (message) =>
+  //     console.log(`[SignOut] ${JSON.stringify(message)}`),
+  //   session: async (message) =>
+  //     console.log(`[Session] ${JSON.stringify(message)}`),
+  // },
 
   secret: process.env.NEXTAUTH_SECRET,
   session: {

@@ -195,7 +195,7 @@ const Render = ({
   ) => {
     return (
       <div className="w-full py-4">
-        <h3 className="font-medium text-xl capitalize">
+        <h3 className="font-medium text-xl capitalize text-primary">
           {splitKeyDisplay(key)}
         </h3>
         {Object.entries(configSchema.properties).map(([subkey, value]) => (
