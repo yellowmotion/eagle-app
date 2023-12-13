@@ -106,3 +106,31 @@ export const groupKeys = (obj: Record<string, any>): any => {
 
   return result;
 };
+
+export const splitKeyDisplays = (key: string): string => {
+  // Verifica se la stringa termina con uno slash seguito da uno o più numeri
+  const regex = /\/\d+$/;
+  if (regex.test(key)) {
+    return "";
+  }
+
+  // Altrimenti, separa la stringa camelCase
+  const words = key.split(/(?=[A-Z])/);
+  return words.map((word) => word.toLowerCase()).join(" ");
+};
+
+export const splitKeyDisplay = (key: string): string => {
+  const regex = /\/\d+$/;
+  if (regex.test(key)) {
+    return "";
+  }
+
+  const words = key.split(/(?=[A-Z])/);
+
+  const lastPathComponent = words
+    .map((word) => word.toLowerCase())
+    .join(" ")
+    .split("/")
+    .pop();
+  return lastPathComponent ? lastPathComponent : key;
+};

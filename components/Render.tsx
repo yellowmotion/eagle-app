@@ -8,7 +8,7 @@ import axios, { AxiosResponse } from "axios";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
 import { jsonToZod } from "@/lib/schema";
-import { schemaResolve, contentDefaultValues, groupKeys } from "@/lib/utils";
+import { schemaResolve, contentDefaultValues, groupKeys, splitKeyDisplay } from "@/lib/utils";
 
 import {
   Form,
@@ -111,10 +111,10 @@ const Render = ({
             name={key}
             render={({ field }) => (
               <FormItem className="py-2">
-                <FormLabel className="capitalize">{label}</FormLabel>
+                <FormLabel className="capitalize">{(label as string).replace(/\d+$/, "")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder={configContent as string}
+                    placeholder={configContent}
                     {...field}
                     className="text-black text-base"
                     defaultValue={configContent}
@@ -126,6 +126,7 @@ const Render = ({
             )}
           />
         );
+      case "number":
       case "integer":
         return (
           <FormField
@@ -133,7 +134,11 @@ const Render = ({
             name={key}
             render={({ field }) => (
               <FormItem className="flex gap-8 items-center py-2">
-                <FormLabel className="text-lg capitalize">{label}</FormLabel>
+                <FormLabel className="text-lg capitalize min-w-max">
+                  {(label as string)
+                    .replace(/([a-z])([A-Z])/g, "$1 $2")
+                    .replace(/\/\d+$/, "")}
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -190,7 +195,9 @@ const Render = ({
   ) => {
     return (
       <div className="w-full py-4">
-        <h3 className="font-medium text-xl">{configSchema.title}</h3>
+        <h3 className="font-medium text-xl capitalize">
+          {splitKeyDisplay(key)}
+        </h3>
         {Object.entries(configSchema.properties).map(([subkey, value]) => (
           <React.Fragment key={subkey}>
             {render(
@@ -211,10 +218,11 @@ const Render = ({
   ) => {
     return (
       <div className="w-full py-4">
-        ARRAY:
-        {/* <h3 className="font-medium text-xl">{configSchema.title}</h3> */}
+        <h3 className="font-medium text-xl capitalize text-primary">
+          {splitKeyDisplay(key)}
+        </h3>
         {configContent.map((item: any, index: number) => (
-          <div key={index} className="py-2">
+          <div key={index} className="py-0">
             {render(
               configSchema.items,
               item,
