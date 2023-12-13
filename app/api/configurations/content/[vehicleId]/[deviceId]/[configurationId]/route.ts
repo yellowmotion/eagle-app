@@ -6,12 +6,16 @@ import { plainToInstance } from 'class-transformer';
 import { ConfigurationMongoContent, RouteParams } from './types';
 import { SchemaBindingMongoContent } from '@/app/api/configurations/schema/[hash]/[configurationId]/types';
 import { Validator } from 'jsonschema';
+import { getJWT } from '@/lib/auth';
 
 export async function GET(
-  _: NextRequest,
+  req: NextRequest,
   { params }: { params: RouteParams }
 ): Promise<NextResponse> {
-  // TODO: Implement authentication
+  const token = await getJWT(req);
+  if (!token) {
+    return new NextResponse(null, { status: 401 });
+  }
 
   const db = await getDatabase();
   const collection = await db.collection('configurations');
@@ -29,6 +33,7 @@ export async function GET(
   const config = plainToInstance(ConfigurationMongoContent, result);
   const errors = await validate(config);
   if (errors.length > 0) {
+    errors.forEach(console.error)
     return new NextResponse(null, { status: 500 });
   }
 
@@ -46,10 +51,13 @@ export async function GET(
 }
 
 export async function HEAD(
-  _: NextRequest,
+  req: NextRequest,
   { params }: { params: RouteParams }
 ): Promise<NextResponse> {
-  // TODO: Implement authentication
+  const token = await getJWT(req);
+  if (!token) {
+    return new NextResponse(null, { status: 401 });
+  }
 
   const db = await getDatabase();
   const collection = await db.collection('configurations');
@@ -86,7 +94,10 @@ export async function POST(
   req: NextRequest,
   { params }: { params: RouteParams }
 ) {
-  // TODO: Implement authentication
+  const token = await getJWT(req);
+  if (!token) {
+    return new NextResponse(null, { status: 401 });
+  }
 
   const content = await req.json();
   const versionHash = req.headers.get('X-ConfigurationVersionHash');
@@ -122,8 +133,6 @@ export async function POST(
 
   const schema = await res.json();
 
-  // const ajv = new Ajv();
-  // const isValidSchema = ajv.validate(schema, content);
   const validator = new Validator();
   const isValidSchema = validator.validate(content, schema);
 
@@ -139,8 +148,12 @@ export async function POST(
       configurationId: params.configurationId,
     },
     {
+      vehicleId: params.vehicleId,
+      deviceId: params.deviceId,
+      configurationId: params.configurationId,
+      configurationVersionHash: versionHash,
       content: content,
-      updatedBy: 'null', // TODO: Change with authenticated user's email
+      updatedBy: 'null@null.nil', // TODO: Change with authenticated user's email
       lastUpdate: new Date().toUTCString(),
     },
     { upsert: true }

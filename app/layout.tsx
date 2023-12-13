@@ -1,6 +1,7 @@
 import * as React from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { redirect } from "next/navigation";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/Icons";
@@ -20,8 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={cn(inter.className, "bg-black px-4 max-w-md m-auto")}>
-        <Providers>{children}</Providers>
+      <body className={cn(inter.className, "bg-black")}>
+        <Providers>
+          <div className="px-4 max-w-md m-auto">{children}</div>
+        </Providers>
       </body>
     </html>
   );
