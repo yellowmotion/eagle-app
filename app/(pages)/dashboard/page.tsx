@@ -1,5 +1,5 @@
+import Connection from "@/components/Connection";
 import { DashboardContextContent } from "@/components/DashboardContext";
-import MqttConnection from "@/components/Mqtt";
 import Protobuf from "@/components/Protobuf";
 import { connect } from "@/lib/mqtt";
 
@@ -13,9 +13,8 @@ export default function DashboardPage() {
     secondary_proto_root: null
   }
 
-  connect(ctx)
-
   return (
+    <Connection>
     <section className="text-white py-5">
       <div className="bg-stone-900 w-full h-20 rounded-md p-3 font-semibold flex flex-col items-start">
         <div className="w-full flex items-center justify-start">
@@ -107,5 +106,6 @@ export default function DashboardPage() {
         </div>
       </div>
     </section>
+    </Connection>
   );
 }
