@@ -84,7 +84,7 @@ export const groupKeys = (obj: Record<string, any>): any => {
 
   Object.keys(obj).forEach((key) => {
     const parts = key.split("/");
-    let currentObj = result;
+    let currentObj: { [k: string]: any } = result;
 
     parts.forEach((part: string, index) => {
       if (index === parts.length - 1) {
