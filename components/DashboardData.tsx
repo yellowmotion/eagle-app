@@ -1,33 +1,13 @@
-'use client'
+"use client";
+import { FC, useState, useEffect } from "react";
 
-import { DashboardContextContent, connect } from "@/lib/mqtt"
-import { FC, useState } from "react"
-
-type DashboardFields = {
-  lastUpdate: Date | null,
-  bestTime: string | null,
-  lastTime: string | null,
-  slip: number | null,
-  torque: number | null,
-  inverterTemp: number | null,
-  motorTemp: number | null,
-  lvCharge: number | null,
-  lvTemp: number | null,
-  hvCharge: number | null,
-  hvTemp: number | null
-}
+import { DashboardContextContent, connect } from "@/lib/mqtt";
+import { DashboardFields } from "@/types/mqtt";
 
 const DashboardData: FC<{}> = () => {
-  const ctx: DashboardContextContent = {
-    client: null,
-    primary_proto_file: null,
-    primary_proto_root: null,
-    secondary_proto_file: null,
-    secondary_proto_root: null
-  }
-
   const [fields, setFields] = useState<DashboardFields>({
     lastUpdate: null,
+    speed: null,
     bestTime: null,
     lastTime: null,
     slip: null,
@@ -37,30 +17,81 @@ const DashboardData: FC<{}> = () => {
     lvCharge: null,
     lvTemp: null,
     hvCharge: null,
-    hvTemp: null
-  })
+    hvTemp: null,
+  });
 
-  connect(ctx, (network, message) => {
-    console.log(message)
-    fields.lastUpdate = new Date()
+  useEffect(() => {
+    const ctx: DashboardContextContent = {
+      client: null,
+      primary_proto_file: null,
+      primary_proto_root: null,
+      secondary_proto_file: null,
+      secondary_proto_root: null,
+    };
 
-    setFields(fields)
-  })
+    const mqttCallback = (network: string, message: { [k: string]: any }) => {
+      setFields((prevFields) => {
+        let newState: DashboardFields = { ...prevFields };
+
+        Object.entries(message).forEach(([messageID, value]: [string, any]) => {
+          if (messageID === "SPEED") {
+            newState.speed = Math.trunc(
+              (value[0].encoderR +
+                value[0].encoderL +
+                value[0].inverterR +
+                value[0].inverterL) /
+                4
+            );
+            // console.log("SPEED update " + newState.speed);
+          } else if (messageID === "STEER_STATUS") {
+            newState.slip = Math.trunc(value[0].map_sc);
+            newState.torque = Math.trunc(value[0].map_tv);
+            // console.log("STEER update " + newState.slip + " " + newState.torque);
+          } else if (messageID === "LV_CELLS_VOLTAGE") {
+            newState.lvCharge = Math.trunc(
+              (value[0].voltage_0 + value[0].voltage_1 + value[0].voltage_2) / 3
+            );
+            // console.log("LV CHARGE update " + newState.lvCharge);
+          } else if (messageID === "LV_CELLS_TEMP") {
+            newState.lvTemp = Math.trunc(
+              (value[0].temp_0 + value[0].temp_1 + value[0].temp_2) / 3
+            );
+            // console.log("LV TEMP update " + newState.lvTemp);
+          } else if (messageID === "HV_TEMP") {
+            newState.hvTemp = Math.trunc(value[0].averageTemp);
+            // console.log("HV TEMP update " + newState.hvTemp);
+          } else if (messageID === "HV_VOLTAGE") {
+            newState.hvCharge = Math.trunc(value[0].pack_voltage);
+            // console.log("HV CHARGE update " + newState.hvCharge);
+          }
+        });
+
+        return newState;
+      });
+    };
+
+    connect(ctx, mqttCallback);
+
+    return () => {};
+  }, [fields]);
 
   return (
-
     <section className="text-white py-5">
       <div className="bg-stone-900 w-full h-20 rounded-md p-3 font-semibold flex flex-col items-start">
         <div className="w-full flex items-center justify-start">
           <p className="text-[#F3FF14] pr-2">STATUS</p>
           <div className="w-2 h-2 rounded-full bg-green-700" />
         </div>
-        <p className="text-lg pl-2">Delta: { fields.lastUpdate != null ? fields.lastUpdate.getSeconds() : "Never" } [s]</p>
+        <p className="text-lg pl-2">
+          Delta:{" "}
+          {fields.lastUpdate != null ? fields.lastUpdate.getSeconds() : "Never"}{" "}
+          [s]
+        </p>
       </div>
 
       <div className="w-full flex "></div>
       <div className="w-full flex items-end justify-center py-10 m-auto">
-        <h1 className="text-6xl font-bold">80.0</h1>
+        <h1 className="text-6xl font-bold">{fields.speed || "N/A"}</h1>
         <p className="text-lg">km/h</p>
       </div>
 
@@ -78,7 +109,7 @@ const DashboardData: FC<{}> = () => {
       <div className="w-full grid grid-cols-4 gap-4">
         <div className="flex flex-col items-center m-auto">
           <div className="flex items-end">
-            <h3 className="text-3xl font-medium">3</h3>
+            <h3 className="text-3xl font-medium">{fields.slip || "N/A"}</h3>
             <p>%</p>
           </div>
           <p className="uppercase">SLIP</p>
@@ -86,7 +117,7 @@ const DashboardData: FC<{}> = () => {
 
         <div className="flex flex-col items-center m-auto">
           <div className="flex items-end">
-            <h3 className="text-3xl font-medium">30</h3>
+            <h3 className="text-3xl font-medium">{fields.torque || "N/A"}</h3>
           </div>
           <p className="uppercase">TRQ</p>
         </div>
@@ -109,7 +140,7 @@ const DashboardData: FC<{}> = () => {
 
         <div className="flex flex-col items-center m-auto">
           <div className="flex items-end">
-            <h3 className="text-3xl font-medium">87</h3>
+            <h3 className="text-3xl font-medium">{fields.lvCharge || "N/A"}</h3>
             <p>%</p>
           </div>
           <p className="uppercase">LV</p>
@@ -117,7 +148,7 @@ const DashboardData: FC<{}> = () => {
 
         <div className="flex flex-col items-center m-auto">
           <div className="flex items-end">
-            <h3 className="text-3xl font-medium">3</h3>
+            <h3 className="text-3xl font-medium">{fields.lvTemp || "N/A"}</h3>
             <p>°C</p>
           </div>
           <p className="uppercase">LV</p>
@@ -125,7 +156,7 @@ const DashboardData: FC<{}> = () => {
 
         <div className="flex flex-col items-center m-auto">
           <div className="flex items-end">
-            <h3 className="text-3xl font-medium">3</h3>
+            <h3 className="text-3xl font-medium">{fields.hvTemp || "N/A"}</h3>
             <p>°C</p>
           </div>
           <p className="uppercase">HV</p>
@@ -133,15 +164,14 @@ const DashboardData: FC<{}> = () => {
 
         <div className="flex flex-col items-center m-auto">
           <div className="flex items-end">
-            <h3 className="text-3xl font-medium">37</h3>
+            <h3 className="text-3xl font-medium">{fields.hvCharge || "N/A"}</h3>
             <p>%</p>
           </div>
           <p className="uppercase">HV</p>
         </div>
       </div>
     </section>
-
   );
 };
 
-export { DashboardData }
+export { DashboardData };
