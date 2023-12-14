@@ -1,6 +1,6 @@
 import { DashboardContextContent } from "@/components/DashboardContext";
 import { Root, parse } from "protobufjs";
-import mqtt from 'mqtt'
+import mqtt, { MqttClient } from 'mqtt'
 
 // TODO: Change fixed data with user selected data 
 const VEHICLE_ID = "fenice-evo"
@@ -9,6 +9,14 @@ const PRIMARY_TOPIC =`${VEHICLE_ID}/${DEVICE_ID}/data/primary`
 const SECONDARY_TOPIC =`${VEHICLE_ID}/${DEVICE_ID}/data/secondary`
 const PRIMARY_PROTO_URL = "https://raw.githubusercontent.com/eagletrt/can/78bfdba12f0547c6fc7ae670536123f9e9a0f3ba/proto/primary/primary.proto" 
 const SECONDARY_PROTO_URL = "https://raw.githubusercontent.com/eagletrt/can/78bfdba12f0547c6fc7ae670536123f9e9a0f3ba/proto/secondary/secondary.proto" 
+
+export type DashboardContextContent = {
+  client: MqttClient | null,
+  primary_proto_file: string | null,
+  secondary_proto_file: string | null,
+  primary_proto_root: Root | null,
+  secondary_proto_root: Root | null,
+}
 
 export async function fetchProtos(): Promise<{ [key: string]: string }> {
   const protos = {
