@@ -37,15 +37,13 @@ const DashboardData: FC<{}> = () => {
           if (messageID === "SPEED") {
             newState.speed = Math.trunc(
               (value[0].encoderR +
-                value[0].encoderL +
-                value[0].inverterR +
-                value[0].inverterL) /
-                4
+                value[0].encoderL) /
+                2
             );
             // console.log("SPEED update " + newState.speed);
           } else if (messageID === "STEER_STATUS") {
-            newState.slip = Math.trunc(value[0].map_sc);
-            newState.torque = Math.trunc(value[0].map_tv);
+            newState.slip = Math.trunc(value[0].mapSc);
+            newState.torque = Math.trunc(value[0].mapTv);
             // console.log("STEER update " + newState.slip + " " + newState.torque);
           } else if (messageID === "LV_CELLS_VOLTAGE") {
             newState.lvCharge = Math.trunc(
@@ -61,7 +59,12 @@ const DashboardData: FC<{}> = () => {
             newState.hvTemp = Math.trunc(value[0].averageTemp);
             // console.log("HV TEMP update " + newState.hvTemp);
           } else if (messageID === "HV_VOLTAGE") {
-            newState.hvCharge = Math.trunc(value[0].pack_voltage);
+            const MAX_VOLTAGE = 400;
+            if(newState.hvCharge === null) {
+              newState.hvCharge = Math.trunc(value[0].packVoltage / MAX_VOLTAGE * 100);
+            } else {
+              newState.hvCharge = Math.trunc(newState.hvCharge*0.99 + 0.01*(value[0].packVoltage / MAX_VOLTAGE * 100));
+            }
             // console.log("HV CHARGE update " + newState.hvCharge);
           }
         });
@@ -91,7 +94,7 @@ const DashboardData: FC<{}> = () => {
 
       <div className="w-full flex "></div>
       <div className="w-full flex items-end justify-center py-10 m-auto">
-        <h1 className="text-6xl font-bold">{fields.speed || "N/A"}</h1>
+        <h1 className="text-6xl font-bold">{fields.speed !== null ? fields.speed : "N/A"}</h1>
         <p className="text-lg">km/h</p>
       </div>
 
@@ -109,7 +112,7 @@ const DashboardData: FC<{}> = () => {
       <div className="w-full grid grid-cols-4 gap-4">
         <div className="flex flex-col items-center m-auto">
           <div className="flex items-end">
-            <h3 className="text-3xl font-medium">{fields.slip || "N/A"}</h3>
+            <h3 className="text-3xl font-medium">{fields.slip !== null ? fields.slip : "N/A"}</h3>
             <p>%</p>
           </div>
           <p className="uppercase">SLIP</p>
@@ -117,7 +120,7 @@ const DashboardData: FC<{}> = () => {
 
         <div className="flex flex-col items-center m-auto">
           <div className="flex items-end">
-            <h3 className="text-3xl font-medium">{fields.torque || "N/A"}</h3>
+            <h3 className="text-3xl font-medium">{fields.torque !== null ? fields.torque : "N/A"}</h3>
           </div>
           <p className="uppercase">TRQ</p>
         </div>
@@ -140,7 +143,7 @@ const DashboardData: FC<{}> = () => {
 
         <div className="flex flex-col items-center m-auto">
           <div className="flex items-end">
-            <h3 className="text-3xl font-medium">{fields.lvCharge || "N/A"}</h3>
+            <h3 className="text-3xl font-medium">{fields.lvCharge !== null ? fields.lvCharge : "N/A"}</h3>
             <p>%</p>
           </div>
           <p className="uppercase">LV</p>
@@ -148,7 +151,7 @@ const DashboardData: FC<{}> = () => {
 
         <div className="flex flex-col items-center m-auto">
           <div className="flex items-end">
-            <h3 className="text-3xl font-medium">{fields.lvTemp || "N/A"}</h3>
+            <h3 className="text-3xl font-medium">{fields.lvTemp !== null ? fields.lvTemp : "N/A"}</h3>
             <p>°C</p>
           </div>
           <p className="uppercase">LV</p>
@@ -156,7 +159,7 @@ const DashboardData: FC<{}> = () => {
 
         <div className="flex flex-col items-center m-auto">
           <div className="flex items-end">
-            <h3 className="text-3xl font-medium">{fields.hvTemp || "N/A"}</h3>
+            <h3 className="text-3xl font-medium">{fields.hvTemp !== null ? fields.hvTemp : "N/A"}</h3>
             <p>°C</p>
           </div>
           <p className="uppercase">HV</p>
@@ -164,7 +167,7 @@ const DashboardData: FC<{}> = () => {
 
         <div className="flex flex-col items-center m-auto">
           <div className="flex items-end">
-            <h3 className="text-3xl font-medium">{fields.hvCharge || "N/A"}</h3>
+            <h3 className="text-3xl font-medium">{fields.hvCharge !== null ? fields.hvCharge : "N/A"}</h3>
             <p>%</p>
           </div>
           <p className="uppercase">HV</p>
