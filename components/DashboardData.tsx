@@ -1,7 +1,21 @@
 'use client'
 
 import { DashboardContextContent, connect } from "@/lib/mqtt"
-import { FC } from "react"
+import { FC, useState } from "react"
+
+type DashboardFields = {
+  lastUpdate: Date | null,
+  bestTime: string | null,
+  lastTime: string | null,
+  slip: number | null,
+  torque: number | null,
+  inverterTemp: number | null,
+  motorTemp: number | null,
+  lvCharge: number | null,
+  lvTemp: number | null,
+  hvCharge: number | null,
+  hvTemp: number | null
+}
 
 const DashboardData: FC<{}> = () => {
   const ctx: DashboardContextContent = {
@@ -12,16 +26,36 @@ const DashboardData: FC<{}> = () => {
     secondary_proto_root: null
   }
 
-  connect(ctx, console.log)
+  const [fields, setFields] = useState<DashboardFields>({
+    lastUpdate: null,
+    bestTime: null,
+    lastTime: null,
+    slip: null,
+    torque: null,
+    inverterTemp: null,
+    motorTemp: null,
+    lvCharge: null,
+    lvTemp: null,
+    hvCharge: null,
+    hvTemp: null
+  })
+
+  connect(ctx, (network, message) => {
+    console.log(message)
+    fields.lastUpdate = new Date()
+
+    setFields(fields)
+  })
 
   return (
+
     <section className="text-white py-5">
       <div className="bg-stone-900 w-full h-20 rounded-md p-3 font-semibold flex flex-col items-start">
         <div className="w-full flex items-center justify-start">
           <p className="text-[#F3FF14] pr-2">STATUS</p>
           <div className="w-2 h-2 rounded-full bg-green-700" />
         </div>
-        <p className="text-lg pl-2">Delta: 1.2 [s]</p>
+        <p className="text-lg pl-2">Delta: { fields.lastUpdate != null ? fields.lastUpdate.getSeconds() : "Never" } [s]</p>
       </div>
 
       <div className="w-full flex "></div>
