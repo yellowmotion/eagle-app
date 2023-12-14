@@ -8,6 +8,65 @@ import { SchemaBindingMongoContent } from '@/app/api/configurations/schema/[hash
 import { Validator } from 'jsonschema';
 import { getJWT } from '@/lib/auth';
 
+/**
+ * @swagger
+ * /api/configurations/content/{vehicleId}/{deviceId}/{configurationId}:
+ *   get:
+ *     summary: Get configuration content
+ *     description: Get configuration content
+ *     tags: [Configurations]
+ *     parameters:
+ *       - in: path
+ *         name: vehicleId
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: path
+ *         name: deviceId
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: path
+ *         name: configurationId
+ *         schema:
+ *           type: string
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Ok. Response correctly sent the configuration content
+ *         headers:
+ *           Content-Type:
+ *             description: Content type of the response
+ *             value: application/json
+ *             schema:
+ *               type: string
+ *           Last-Modified:
+ *             description: Last modification date of the configuration
+ *             schema:
+ *               type: string
+ *           X-VehicleId:
+ *             description: The vehicle id of the configuration
+ *             schema:
+ *               type: string
+ *           X-DeviceId:
+ *             description: The device id of the configuration
+ *             schema:
+ *               type: string
+ *           X-ConfigurationId:
+ *             description: The configuration id searched
+ *             schema:
+ *               type: string
+ *           X-ConfigurationVersionHash:
+ *             description: Configuration has versioning. This is the hash of the version of the configuration
+ *             schema:
+ *               type: string
+ *       401:
+ *         description: Unauthorized. Probably missing or invalid JWT token
+ *       404:
+ *         description: Not found. Configuration cannot be found
+ *       500:
+ *         description: Internal Server Error. Something went wrong on the server side
+ */
 export async function GET(
   req: NextRequest,
   { params }: { params: RouteParams }
@@ -50,6 +109,60 @@ export async function GET(
   });
 }
 
+/**
+ * @swagger
+ * /api/configurations/content/{vehicleId}/{deviceId}/{configurationId}:
+ *   head:
+ *     summary: Fetch last modification date of the configuration
+ *     description: HEAD request must be used for checking if the configuration has been modified since the last time it has been downloaded with GET method. If the configuration has been modified, the GET method must be used to download the new version of the configuration, if user accepts it.
+ *     tags: [Configurations]
+ *     parameters:
+ *       - in: path
+ *         name: vehicleId
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: path
+ *         name: deviceId
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: path
+ *         name: configurationId
+ *         schema:
+ *           type: string
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Ok. Response correctly sent the configuration content
+ *         headers:
+ *           Last-Modified:
+ *             description: Last modification date of the configuration
+ *             schema:
+ *               type: string
+ *           X-VehicleId:
+ *             description: The vehicle id of the configuration
+ *             schema:
+ *               type: string
+ *           X-DeviceId:
+ *             description: The device id of the configuration
+ *             schema:
+ *               type: string
+ *           X-ConfigurationId:
+ *             description: The configuration id searched
+ *             schema:
+ *               type: string
+ *           X-ConfigurationVersionHash:
+ *             description: Configuration has versioning. This is the hash of the version of the configuration
+ *             schema:
+ *               type: string
+ *       401:
+ *         description: Unauthorized. Probably missing or invalid JWT token
+ *       404:
+ *         description: Not found. Configuration cannot be found
+ *       500:
+ *         description: Internal Server Error. Something went wrong on the server side
+ */
 export async function HEAD(
   req: NextRequest,
   { params }: { params: RouteParams }
@@ -90,6 +203,46 @@ export async function HEAD(
   });
 }
 
+/**
+ * @swagger
+ * /api/configurations/content/{vehicleId}/{deviceId}/{configurationId}:
+ *   post:
+ *     summary: Save configuration on the cloud
+ *     description: After the configuration has been validated against the schema, it can be saved on the cloud. The configuration will overwrite the previous version of the configuration.
+ *     tags: [Configurations]
+ *     parameters:
+ *       - in: path
+ *         name: vehicleId
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: path
+ *         name: deviceId
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: path
+ *         name: configurationId
+ *         schema:
+ *           type: string
+ *         required: true
+ *     requestBody:
+ *       description: Body must contain a valid configuration, that will be validated against the schema. Must be a valid JSON object.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           description: A valid JSON object
+ *           example: { "key": "value" }
+ *     responses:
+ *       200:
+ *         description: Ok. Configuration has been saved
+ *       401:
+ *         description: Unauthorized. Probably missing or invalid JWT token
+ *       404:
+ *         description: Not found. Configuration cannot be found
+ *       500:
+ *         description: Internal Server Error. Something went wrong on the server side
+ */
 export async function POST(
   req: NextRequest,
   { params }: { params: RouteParams }
