@@ -73,7 +73,7 @@ const DashboardData: FC<{}> = () => {
     connect(ctx, mqttCallback);
 
     return () => {};
-  }, [fields]);
+  }, []);
 
   return (
     <section className="text-white py-5">
