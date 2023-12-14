@@ -4,7 +4,7 @@ import Render from "@/components/Render";
 
 const TelemetryConfig = () => {
   return (
-    <div className="w-full flex flex-col items-start gap-4 py-8 pb-20 text-white">
+    <div className="w-full flex flex-col items-start gap-4 pb-20 text-white">
       <React.Suspense fallback={<p>Loading...</p>}>
         <Render
           vehicleId="fenice-evo"

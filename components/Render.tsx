@@ -5,10 +5,10 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import axios, { AxiosResponse } from "axios";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 import { jsonToZod } from "@/lib/schema";
-import { schemaResolve } from "@/lib/utils";
+import { schemaResolve, contentDefaultValues, groupKeys, splitKeyDisplay } from "@/lib/utils";
 
 import {
   Form,
@@ -34,10 +34,11 @@ const Render = ({
   deviceId: string;
   configurationId: string;
 }) => {
-  const form = useForm();
-
   const [schema, setSchema] = React.useState<any>({});
   const [content, setContent] = React.useState<any>({});
+  const form = useForm({
+    defaultValues: contentDefaultValues(schema, content),
+  });
 
   const configContent = useQuery({
     queryKey: [configurationId, "content"],
@@ -60,23 +61,44 @@ const Render = ({
     enabled: !!configContent.data,
   });
 
+  const mutation = useMutation({
+    mutationFn: async (values: any) => {
+      const response = await axios.post(
+        `/api/configurations/content/${vehicleId}/${deviceId}/${configurationId}`,
+        values,
+        {
+          headers: {
+            "X-ConfigurationVersionHash":
+              configContent.data?.headers["x-configurationversionhash"],
+          },
+        }
+      );
+      return response;
+    },
+  });
+
   useEffect(() => {
     if (configSchema.data && configSchema.isSuccess) {
       setSchema(schemaResolve(configSchema.data.data, configSchema.data.data));
     }
     if (configContent.data && configContent.isSuccess) {
       setContent(configContent.data.data);
+      form.reset(contentDefaultValues(schema, configContent.data.data));
     }
   }, [
     configSchema.data,
     configSchema.isSuccess,
     configContent.data,
     configContent.isSuccess,
+    form,
+    schema,
   ]);
 
   function onSubmit(values: any) {
     console.log("INVIATO");
-    console.log(form.getValues());
+    console.log(values);
+    mutation.mutate(groupKeys(values));
+    console.log(mutation);
   }
 
   const render = (configSchema: any, configContent: any, key: string) => {
@@ -89,10 +111,10 @@ const Render = ({
             name={key}
             render={({ field }) => (
               <FormItem className="py-2">
-                <FormLabel className="capitalize">{label}</FormLabel>
+                <FormLabel className="capitalize">{(label as string).replace(/\d+$/, "")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder={configContent as string}
+                    placeholder={configContent}
                     {...field}
                     className="text-black text-base"
                     defaultValue={configContent}
@@ -104,6 +126,7 @@ const Render = ({
             )}
           />
         );
+      case "number":
       case "integer":
         return (
           <FormField
@@ -111,7 +134,11 @@ const Render = ({
             name={key}
             render={({ field }) => (
               <FormItem className="flex gap-8 items-center py-2">
-                <FormLabel className="text-lg capitalize">{label}</FormLabel>
+                <FormLabel className="text-lg capitalize min-w-max">
+                  {(label as string)
+                    .replace(/([a-z])([A-Z])/g, "$1 $2")
+                    .replace(/\/\d+$/, "")}
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -155,12 +182,7 @@ const Render = ({
       case "object":
         return renderObjectField(configSchema, configContent, key);
       case "array":
-        return (
-          <div>
-            <p>{key}</p>
-            <p>Array</p>
-          </div>
-        );
+        return renderArrayField(configSchema, configContent, key);
       default:
         return null;
     }
@@ -173,7 +195,9 @@ const Render = ({
   ) => {
     return (
       <div className="w-full py-4">
-        <h3 className="font-medium text-xl">{configSchema.title}</h3>
+        <h3 className="font-medium text-xl capitalize text-primary">
+          {splitKeyDisplay(key)}
+        </h3>
         {Object.entries(configSchema.properties).map(([subkey, value]) => (
           <React.Fragment key={subkey}>
             {render(
@@ -181,15 +205,36 @@ const Render = ({
               configContent[subkey],
               key.length > 0 ? `${key}/${subkey}` : subkey
             )}
-
           </React.Fragment>
         ))}
       </div>
     );
   };
 
-  if (!schema || !content) return null;
+  const renderArrayField = (
+    configSchema: any,
+    configContent: any,
+    key: string
+  ) => {
+    return (
+      <div className="w-full py-4">
+        <h3 className="font-medium text-xl capitalize text-primary">
+          {splitKeyDisplay(key)}
+        </h3>
+        {configContent.map((item: any, index: number) => (
+          <div key={index} className="py-0">
+            {render(
+              configSchema.items,
+              item,
+              key.length > 0 ? `${key}/${index}` : `${index}`
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
+  if (!schema || !content) return null;
 
   return (
     <>
@@ -202,7 +247,10 @@ const Render = ({
         </form>
       </Form>
       <div className="fixed bottom-2 left-0 right-0 max-w-md p-2 m-auto">
-        <ConfigHandler onSendClick={form.handleSubmit(onSubmit)} onRefreshClick={configContent.refetch}/>
+        <ConfigHandler
+          onSendClick={form.handleSubmit(onSubmit)}
+          onRefreshClick={configContent.refetch}
+        />
       </div>
     </>
   );
