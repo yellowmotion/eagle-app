@@ -4,6 +4,42 @@ import { validate } from 'class-validator';
 import { AirtableBodyRequest } from './types';
 import { plainToInstance } from 'class-transformer';
 
+/**
+ * @swagger
+ * /api/configurations/internal/airtable:
+ *   post:
+ *     summary: Send allowed users and roles from Airtable control panel to the database.
+ *     description: Airtable control panel is used to manage users and roles. Every 10 minutes, Airtable pushes the users table on this endpoint. The endpoint will validate the request and save the data in the database. The platform must provide an authoriation bearer token in the request header.
+ *     tags: [Airtable]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       description: Airtable request body
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               roles:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     email:
+ *                       type: string
+ *                     role:
+ *                       type: number
+ *     responses:
+ *       200:
+ *         description: Ok. Successfully saved users and roles
+ *       401:
+ *         description: Unauthorized. Probably missing or invalid JWT token
+ *       400:
+ *         description: Bad Request. Request body is not valid
+ *       500:
+ *         description: Internal Server Error. Something went wrong on the server side
+ */
 export async function POST(req: Request) {
     if (!req.headers.has('Authorization')) {
         return new Response(null, { status: 401 });
