@@ -51,7 +51,7 @@ export async function connect(
   ctx.secondary_proto_file = protoFiles["secondary"];
   ctx.primary_proto_root = rootFromProtoFile(ctx.primary_proto_file);
   ctx.secondary_proto_root = rootFromProtoFile(ctx.secondary_proto_file);
-  ctx.client = mqtt.connect("ws://api.eagletrt.it:9001");
+  ctx.client = mqtt.connect("wss://app.eagletrt.it/mqtt");
 
   ctx.client?.on("connect", () => {
     console.log("connected");
