@@ -1,12 +1,4 @@
 import { Icons } from "@/components/Icons";
-import { Button, buttonVariants } from "@/components/ui/button";
-import Image from "next/image";
-import Link from "next/link";
-import { redirect } from 'next/navigation';
-
-import { cn } from "@/lib/utils";
-import { getAuthSession } from "@/lib/auth";
-
 import UserAuthForm from "@/components/UserAuthForm";
 
 export default async function SignIn() {

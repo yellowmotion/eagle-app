@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
-import { ConfigHandler } from "@/components/ConfigHandler";
-import ConfigNavbar from "@/components/ConfigNavbar";
+
 import { UserAccountNav } from "@/components/UserAccountNav";
 import { ComboboxDemo } from "@/components/ui/combobox";
 

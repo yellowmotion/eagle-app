@@ -1,11 +1,11 @@
 import * as React from "react";
 import type { Metadata } from "next";
+
 import { Inter } from "next/font/google";
-import { redirect } from "next/navigation";
 import "./globals.css";
-import { cn } from "@/lib/utils";
-import { Icons } from "@/components/Icons";
+
 import Providers from "@/components/Providers";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,10 +21,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={cn(inter.className, "bg-black")}>
-        <Providers>
-          <div className="px-4 max-w-md m-auto">{children}</div>
-        </Providers>
+      <body className={inter.className}>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
