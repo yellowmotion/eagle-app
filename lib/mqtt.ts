@@ -1,8 +1,7 @@
-import { DashboardContextContent } from "@/components/DashboardContext";
 import { Root, parse } from "protobufjs";
 import mqtt, { MqttClient } from "mqtt";
 
-import { DashboardFields } from "@/types/mqtt";
+import { DashboardFields, DashboardContextContent } from "@/types/mqtt";
 
 // TODO: Change fixed data with user selected data
 const VEHICLE_ID = "fenice-evo";
@@ -13,14 +12,6 @@ const PRIMARY_PROTO_URL =
   "https://raw.githubusercontent.com/eagletrt/can/78bfdba12f0547c6fc7ae670536123f9e9a0f3ba/proto/primary/primary.proto";
 const SECONDARY_PROTO_URL =
   "https://raw.githubusercontent.com/eagletrt/can/78bfdba12f0547c6fc7ae670536123f9e9a0f3ba/proto/secondary/secondary.proto";
-
-export type DashboardContextContent = {
-  client: MqttClient | null;
-  primary_proto_file: string | null;
-  secondary_proto_file: string | null;
-  primary_proto_root: Root | null;
-  secondary_proto_root: Root | null;
-};
 
 export async function fetchProtos(): Promise<{ [key: string]: string }> {
   const protos = {
@@ -64,14 +55,14 @@ export async function connect(
 
   ctx.client?.on("connect", () => {
     console.log("connected");
-    ctx.client?.subscribe([PRIMARY_TOPIC, SECONDARY_TOPIC], (err) => {
+    ctx.client?.subscribe([PRIMARY_TOPIC, SECONDARY_TOPIC], (err: any) => {
       if (err) {
         throw err;
       }
     });
   });
 
-  ctx.client?.on("message", (topic, payload) =>
+  ctx.client?.on("message", (topic: any, payload: any) =>
     handleMqttMessage(ctx, callback, topic, payload)
   );
 }

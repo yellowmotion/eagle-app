@@ -1,8 +1,8 @@
 "use client";
 import { FC, useState, useEffect } from "react";
 
-import { DashboardContextContent, connect } from "@/lib/mqtt";
-import { DashboardFields } from "@/types/mqtt";
+import { connect } from "@/lib/mqtt";
+import { DashboardFields, DashboardContextContent } from "@/types/mqtt";
 
 const DashboardData: FC<{}> = () => {
   const [fields, setFields] = useState<DashboardFields>({
