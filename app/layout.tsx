@@ -10,8 +10,16 @@ import Providers from "@/components/Providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "E-Agle App",
-  description: "Mobile E-Agle App",
+  title: 'E-Agle App',
+  description: 'The E-AgleTRT official app for checking live data and configurations.',
+  manifest: 'manifest.webmanifest',
+  publisher: 'E-AgleTRT Software Team',
+  appleWebApp: {
+    title: 'E-Agle App',
+    startupImage: {
+      url: 'logo/Aquila.png'
+    } 
+  }
 };
 
 export default function RootLayout({
