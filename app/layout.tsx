@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     title: 'E-Agle App',
     startupImage: {
-      url: 'logo/Aquila.png'
+      url: 'logo/apple-icon.png'
     } 
   }
 };
