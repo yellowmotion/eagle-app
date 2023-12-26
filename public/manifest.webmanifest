@@ -7,6 +7,7 @@
     "name": "E-Agle App",
     "short_name": "E-Agle App",
     "description": "The E-AgleTRT official app for checking live data and configurations.",
+    "orientation": "portrait",
     "icons": [
         {
             "src": "icons\/android-icon-36x36.png",

@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   publisher: 'E-AgleTRT Software Team',
   appleWebApp: {
     title: 'E-Agle App',
+    capable: true,
     startupImage: {
       url: 'logo/apple-icon.png'
     } 
