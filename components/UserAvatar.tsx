@@ -1,19 +1,13 @@
 import Image from 'next/image'
-// import { User } from '@prisma/client'
+import { User } from "next-auth";
+
 import { AvatarProps } from '@radix-ui/react-avatar'
 
 import { Icons } from '@/components/Icons'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
-// interface UserAvatarProps extends AvatarProps {
-//   user: Pick<User, 'image' | 'name'>
-// }
-// TODO: change to User type from prisma 
 interface UserAvatarProps extends AvatarProps {
-  user: {
-    image?: string
-    name?: string
-  }
+  user: Pick<User, 'image' | 'name'>
 }
 
 export function UserAvatar({ user, ...props }: UserAvatarProps) {

@@ -33,7 +33,7 @@ const ConfigSkeleton = () => {
             <Skeleton className="w-full h-[35px] rounded-md" />
         </div>
 
-        <div className="py-2 flex flex gap-2 items-center">
+        <div className="py-2 flex gap-2 items-center">
             <Skeleton className="w-[200px] h-[20px] rounded-full" />
             <Skeleton className="w-full h-[35px] rounded-md" />
         </div>
@@ -50,7 +50,7 @@ const ConfigSkeleton = () => {
         
         <Skeleton className="w-[200px] h-[22px] rounded-full bg-primary" />
         
-        <div className="py-2 flex flex gap-2 items-center">
+        <div className="py-2 flex gap-2 items-center">
             <Skeleton className="w-[500px] h-[20px] rounded-full" />
             <Skeleton className="w-full h-[35px] rounded-md" />
         </div>

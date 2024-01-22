@@ -13,17 +13,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/UserAvatar";
 
-// export interface UserAccountNavProps
-//   extends React.HTMLAttributes<HTMLDivElement> {
-//   user: Pick<User, "name" | "image" | "email">;
-// }
 export interface UserAccountNavProps
   extends React.HTMLAttributes<HTMLDivElement> {
-  user: {
-    name?: string | null | undefined;
-    image?: string | null | undefined;
-    email?: string | null | undefined;
-  };
+  user: Pick<User, "name" | "image" | "email">;
 }
 
 export function UserAccountNav({ user }: UserAccountNavProps) {

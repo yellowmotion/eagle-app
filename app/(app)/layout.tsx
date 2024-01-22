@@ -1,10 +1,5 @@
 import * as React from "react";
 
-// export const metadata: Metadata = {
-//   title: "E-Agle App",
-//   description: "Mobile E-Agle App",
-// };
-
 export default function RootLayout({
   children,
 }: Readonly<{

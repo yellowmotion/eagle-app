@@ -3,9 +3,10 @@ import { signIn } from "next-auth/react";
 import * as React from "react";
 import { FC } from "react";
 
-import { cn } from "@/lib/utils";
-import { Icons } from "@/components/Icons";
 import { Button } from "@/components/ui/button";
+
+import { cn } from "@/lib/utils";
+import { toast } from "react-hot-toast";
 // import { useToast } from "@/hooks/use-toast";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLButtonElement> {}
@@ -20,12 +21,7 @@ const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
     try {
       await signIn("google", { callbackUrl: "/" });
     } catch (error) {
-      console.error("ERRORE_GOOGLE", error);
-      //   toast({
-      //     title: "Error",
-      //     description: "There was an error logging in with Google",
-      //     variant: "destructive",
-      //   });
+      toast.error("Errore di login");
     } finally {
       setIsGoogleLoading(false);
     }
