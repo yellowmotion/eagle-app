@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import axios, { AxiosResponse } from "axios";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
 
 import { schemaResolve, contentDefaultValues, groupKeys, splitKeyDisplay } from "@/lib/utils";
 
@@ -17,7 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { ConfigHandler } from "@/components/ConfigHandler";
@@ -36,6 +36,7 @@ const Render = ({
   const form = useForm({
     defaultValues: contentDefaultValues(schema, content),
   });
+  let toastId: string;
 
   const configContent = useQuery({
     queryKey: [configurationId, "content"],
@@ -60,6 +61,7 @@ const Render = ({
 
   const mutation = useMutation({
     mutationFn: async (values: any) => {
+      toastId = toast.loading("Saving configuration...");
       const response = await axios.post(
         `/api/configurations/content/${vehicleId}/${deviceId}/${configurationId}`,
         values,
@@ -72,7 +74,22 @@ const Render = ({
       );
       return response;
     },
+    onSuccess: () => {
+      toast.dismiss(toastId);
+      toast.success("Configuration saved!");
+    },
+    onError: () => {
+      toast.dismiss(toastId);
+      toast.error("Error saving configuration!");
+    },
   });
+
+  const handleRefresh = () => {
+    toastId = toast.loading("Fetching...");
+    configContent.refetch;
+    toast.dismiss(toastId);
+    toast.success("Configuration fetched!");
+  }
 
   useEffect(() => {
     if (configSchema.data && configSchema.isSuccess) {
@@ -92,10 +109,7 @@ const Render = ({
   ]);
 
   function onSubmit(values: any) {
-    console.log("INVIATO");
-    console.log(values);
     mutation.mutate(groupKeys(values));
-    console.log(mutation);
   }
 
   const render = (configSchema: any, configContent: any, key: string) => {
@@ -246,7 +260,7 @@ const Render = ({
       <div className="fixed bottom-2 left-0 right-0 max-w-md p-2 m-auto">
         <ConfigHandler
           onSendClick={form.handleSubmit(onSubmit)}
-          onRefreshClick={configContent.refetch}
+          onRefreshClick={handleRefresh}
         />
       </div>
     </>

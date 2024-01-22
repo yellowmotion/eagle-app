@@ -2,6 +2,7 @@
 import React, { FC, ReactNode } from "react";
 import { SessionProvider } from "next-auth/react";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { Toaster } from "react-hot-toast";
 
 
 const ReactQueryDevtoolsProduction = React.lazy(() =>
@@ -21,6 +22,7 @@ const queryClient = new QueryClient();
 const Providers: FC<LayoutProps> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
+      <Toaster />
       <SessionProvider>
         {children}
       </SessionProvider>
