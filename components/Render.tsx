@@ -1,13 +1,10 @@
 "use client";
 import React, { useEffect } from "react";
 
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import axios, { AxiosResponse } from "axios";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
-import { jsonToZod } from "@/lib/schema";
 import { schemaResolve, contentDefaultValues, groupKeys, splitKeyDisplay } from "@/lib/utils";
 
 import {
