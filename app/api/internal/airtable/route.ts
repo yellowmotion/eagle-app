@@ -47,8 +47,6 @@ export async function POST(req: Request) {
 
     const [prefix, token] = req.headers.get('Authorization')!.split(' ');
 
-    console.log(prefix, token);
-    
     if (!prefix || !token || prefix !== 'Bearer' || token !== process.env.AIRTABLE_TOKEN) {
         return new Response(null, { status: 401 });
     }
