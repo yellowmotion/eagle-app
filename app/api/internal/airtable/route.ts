@@ -46,13 +46,26 @@ export async function POST(req: Request) {
     }
 
     const [prefix, token] = req.headers.get('Authorization')!.split(' ');
-    if (prefix != 'Bearer' && token != process.env.AIRTABLE_TOKEN) {
+
+    console.log(prefix, token);
+    
+    if (!prefix || !token || prefix !== 'Bearer' || token !== process.env.AIRTABLE_TOKEN) {
         return new Response(null, { status: 401 });
+    }
+
+    let body: { [key: string]: any };
+    try {
+        body = await req.json();
+    }
+    catch (e) {
+        return new Response(null, {
+            status: 400,
+        });
     }
 
     const payload: AirtableBodyRequest = plainToInstance(
         AirtableBodyRequest,
-        await req.json()
+        body
     );
 
     const errors = await validate(payload);
