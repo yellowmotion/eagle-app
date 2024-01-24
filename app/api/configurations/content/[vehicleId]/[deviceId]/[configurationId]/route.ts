@@ -92,7 +92,6 @@ export async function GET(
   const config = plainToInstance(ConfigurationMongoContent, result);
   const errors = await validate(config);
   if (errors.length > 0) {
-    errors.forEach(console.error)
     return new NextResponse(null, { status: 500 });
   }
 
@@ -248,6 +247,7 @@ export async function POST(
   { params }: { params: RouteParams }
 ) {
   const token = await getJWT(req);
+
   if (!token) {
     return new NextResponse(null, { status: 401 });
   }
@@ -280,16 +280,21 @@ export async function POST(
 
   const res = await fetch(binding.url, { cache: 'force-cache' });
   if (!res.ok) {
-    console.error('request');
     return new NextResponse(null, { status: 500 });
   }
 
-  const schema = await res.json();
+  let schema: { [key: string]: any };
+  try {
+    schema = await res.json();
+  }
+  catch (e) {
+    return new NextResponse(null, { status: 500 });
+  }
 
   const validator = new Validator();
   const isValidSchema = validator.validate(content, schema);
 
-  if (!isValidSchema) {
+  if (isValidSchema.errors.length > 0) {
     return new NextResponse(null, { status: 400 });
   }
 
