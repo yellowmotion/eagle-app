@@ -40,7 +40,7 @@ import { plainToInstance } from 'class-transformer';
  *       500:
  *         description: Internal Server Error. Something went wrong on the server side
  */
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<Response> {
     if (!req.headers.has('Authorization')) {
         return new Response(null, { status: 401 });
     }
@@ -75,8 +75,8 @@ export async function POST(req: Request) {
 
     // Erase collection before putting new data
     let db = await getDatabase();
-    db.collection('roles').drop();
-    db.collection('roles').insertMany(payload.roles);
+    await db.collection('roles').drop();
+    await db.collection('roles').insertMany(payload.roles);
 
     return new Response(null, {
         status: 200,

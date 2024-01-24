@@ -1,10 +1,19 @@
 import { POST } from './route'
-import { expect, test, describe } from '@jest/globals';
+import { expect, test, describe, beforeAll, afterAll } from '@jest/globals';
 import { faker, fakerIT } from '@faker-js/faker'
 
 // Path: app/api/internal/airtable/route.ts
 
 describe("POST /api/configurations/internal/airtable", () => {
+
+  // Test db connection
+  beforeAll(async () => {
+    console.log('Starting Airtable POST tests')
+  })
+  
+  afterAll(async () => {
+    console.log('Finished Airtable POST tests')
+  })
 
   test('Authorization header not set', async () => {
 
@@ -99,6 +108,7 @@ describe("POST /api/configurations/internal/airtable", () => {
 
   test('Request with empty body', async () => {
 
+
     const req = new Request('http://domain/api/internal/airtable', {
       method: 'POST',
       headers: {
@@ -107,7 +117,7 @@ describe("POST /api/configurations/internal/airtable", () => {
       },
     })
 
-    const res = await POST(req) 
+    const res = await POST(req)
     expect(res.status).toBe(400)  // Bad request 
   })
 
@@ -213,4 +223,5 @@ describe("POST /api/configurations/internal/airtable", () => {
     const res = await POST(req) 
     expect(res.status).toBe(200)  // Ok
   })
+
 })
