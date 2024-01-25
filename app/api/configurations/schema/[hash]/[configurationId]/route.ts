@@ -61,14 +61,27 @@ export async function GET(
 
   binding.url = binding.url.replace('{hash}', params.hash);
 
-  const res = await fetch(binding.url, { cache: 'force-cache' });
-  if (!res.ok) {
+  let res: Response;
+  try {
+    res = await fetch(binding.url, { cache: 'force-cache' });
+  }
+  catch (e) {
     return new NextResponse(null, { status: 500 });
   }
 
-  const schema = await res.text();
+  if (!res.ok) {
+    return new NextResponse(null, { status: 500 });
+  }
+  
+  let schema: { [key: string]: any };
+  try {
+    schema = await res.json();    
+  }
+  catch (e) {
+    return new NextResponse(null, { status: 500 });
+  }
 
-  return new NextResponse(schema, {
+  return new NextResponse(JSON.stringify(schema), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
