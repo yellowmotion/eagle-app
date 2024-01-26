@@ -79,13 +79,13 @@ const DashboardData: FC<{}> = () => {
   }, []);
 
   return (
-    <section className="text-white py-5">
+    <section className="text-black dark:text-white py-5">
       <div className="bg-stone-900 w-full h-20 rounded-md p-3 font-semibold flex flex-col items-start">
         <div className="w-full flex items-center justify-start">
           <p className="text-[#F3FF14] pr-2">STATUS</p>
           <div className="w-2 h-2 rounded-full bg-green-700" />
         </div>
-        <p className="text-lg pl-2">
+        <p className="text-white text-lg pl-2">
           Delta:{" "}
           {fields.lastUpdate != null ? fields.lastUpdate.getSeconds() : "Never"}{" "}
           [s]

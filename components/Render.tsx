@@ -127,7 +127,7 @@ const Render = ({
                   <Input
                     placeholder={configContent}
                     {...field}
-                    className="text-black text-base"
+                    className="text-black dark:text-white text-base"
                     defaultValue={configContent}
                   />
                 </FormControl>
@@ -155,7 +155,7 @@ const Render = ({
                     type="number"
                     placeholder={configContent}
                     {...field}
-                    className="text-black text-base"
+                    className="text-black dark:text-white text-base"
                   />
                 </FormControl>
                 {/* <FormDescription>{configContent}</FormDescription> */}
@@ -252,7 +252,7 @@ const Render = ({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-full"
+          className="space-y-8 w-full text-black dark:text-white"
         >
           {render(schema, content, "")}
         </form>

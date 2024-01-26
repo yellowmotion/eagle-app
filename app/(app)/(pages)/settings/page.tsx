@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 export default function SettingsPage() {
   const session = useSession();
   return (
-    <section className="w-full text-white py-5">
+    <section className="w-full text-black dark:text-white py-5">
       <div className="w-full">
         <p className="text-xl font-medium">Logged as:</p>
         <p className="text-primary font-bold text-center">

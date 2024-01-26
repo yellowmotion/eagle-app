@@ -38,6 +38,7 @@
     "next": "14.0.3",
     "next-auth": "^4.24.5",
     "next-swagger-doc": "^0.4.0",
+    "next-themes": "^0.2.1",
     "protobufjs": "^7.2.5",
     "react": "^18",
     "react-dom": "^18",
