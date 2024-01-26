@@ -6,7 +6,7 @@ import { plainToInstance } from 'class-transformer';
 
 /**
  * @swagger
- * /api/configurations/internal/airtable:
+ * /api/internal/airtable:
  *   post:
  *     summary: Send allowed users and roles from Airtable control panel to the database.
  *     description: Airtable control panel is used to manage users and roles. Every 10 minutes, Airtable pushes the users table on this endpoint. The endpoint will validate the request and save the data in the database. The platform must provide an authoriation bearer token in the request header.

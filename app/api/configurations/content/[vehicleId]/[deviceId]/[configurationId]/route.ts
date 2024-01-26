@@ -77,7 +77,7 @@ export async function GET(
   }
 
   const db = await getDatabase();
-  const collection = await db.collection('configurations');
+  const collection = db.collection('configurations');
 
   const result = await collection.findOne({
     vehicleId: params.vehicleId,
@@ -100,6 +100,7 @@ export async function GET(
     headers: {
       'Content-Type': 'application/json',
       'Last-Modified': config.lastUpdate,
+      'X-Modified-By': config.lastUpdate,
       'X-VehicleId': config.vehicleId,
       'X-DeviceId': config.deviceId,
       'X-ConfigurationId': config.configurationId,
@@ -299,7 +300,7 @@ export async function POST(
   }
 
   const configurationsCollection = await db.collection('configurations');
-  await configurationsCollection.replaceOne(
+  const { modifiedCount } = await configurationsCollection.replaceOne(
     {
       vehicleId: params.vehicleId,
       deviceId: params.deviceId,
@@ -314,8 +315,14 @@ export async function POST(
       updatedBy: 'null@null.nil', // TODO: Change with authenticated user's email
       lastUpdate: new Date().toUTCString(),
     },
-    { upsert: true }
-  ); // TODO: Add insert error check
+    { upsert: false }
+  ); 
+
+  // If replaceOne() returns acknowledged = false, it means that the configuration has not been found
+  // so we return a 404 Not Found
+  if (modifiedCount === 0) {
+    return new NextResponse(null, { status: 404 });
+  }
 
   return new NextResponse(null, { status: 200 });
 }

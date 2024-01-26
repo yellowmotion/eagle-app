@@ -237,6 +237,31 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
     expect(res.status).toBe(400)  // Bad Request
   })
 
+  test('Request to push a configuration with not owned configurationId', async () => {
+
+    const req = new Request('http://domain/api/configurations/content/vehicle/device/configuration', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.TESTING_VALID_TOKEN}`,
+        'X-ConfigurationVersionHash': `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`
+      },
+      body: JSON.stringify({
+        temperature: 20,
+        humidity: 40
+      })
+    })
+
+    const res = await POST(req as NextRequest, {
+      params: {
+        vehicleId: 'another_vehicle',
+        deviceId: 'device',
+        configurationId: 'configuration'
+      }
+    })
+
+    expect(res.status).toBe(404)  // Not Found 
+  })
+
   test('Correct request', async () => {
     
     const req = new Request('http://domain/api/configurations/content/vehicle/device/configuration', {
