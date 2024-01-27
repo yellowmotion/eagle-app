@@ -76,7 +76,7 @@ describe('HEAD /api/configurations/content/:vehicleId/:deviceId/:configurationId
     const req = new Request('http://domain/api/configurations/content/vehicle/device/configuration', {
       method: 'HEAD',
       headers: {
-        'Authorization': `Beer ${process.env.AIRTABLE_TOKEN}`
+        'Authorization': `Beer ${process.env.TESTING_VALID_TOKEN}`
       }
     })
 

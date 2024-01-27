@@ -284,6 +284,6 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
       }
     })
 
-    expect(res.status).toBe(200)  // Bad Request
+    expect(res.status).toBe(200)  // Ok
   })
 })

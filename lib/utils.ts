@@ -22,19 +22,22 @@ export const schemaResolve = (schema: any, root: any) => {
       refObj.properties[prop] = schemaResolve(refObj.properties[prop], root);
     }
     return refObj;
-  } else if (schema.type === "string") return schema;
+  } 
+  else if (schema.type === "string") return schema;
   else if (schema.type === "integer") return schema;
   else if (schema.type === "number") return schema;
   else if (schema.type === "boolean") return schema;
   else if (schema.type === "array") {
     schema.items = schemaResolve(schema.items, root);
     return schema;
-  } else if (schema.type === "object") {
+  } 
+  else if (schema.type === "object") {
     for (const prop in schema.properties) {
       schema.properties[prop] = schemaResolve(schema.properties[prop], root);
     }
     return schema;
-  } else {
+  } 
+  else {
     console.log("[SCHEMA] ERRORE: ", schema);
   }
 };
@@ -107,18 +110,6 @@ export const groupKeys = (obj: Record<string, any>): any => {
   return result;
 };
 
-export const splitKeyDisplays = (key: string): string => {
-  // Verifica se la stringa termina con uno slash seguito da uno o più numeri
-  const regex = /\/\d+$/;
-  if (regex.test(key)) {
-    return "";
-  }
-
-  // Altrimenti, separa la stringa camelCase
-  const words = key.split(/(?=[A-Z])/);
-  return words.map((word) => word.toLowerCase()).join(" ");
-};
-
 export const splitKeyDisplay = (key: string): string => {
   const regex = /\/\d+$/;
   if (regex.test(key)) {
@@ -132,5 +123,5 @@ export const splitKeyDisplay = (key: string): string => {
     .join(" ")
     .split("/")
     .pop();
-  return lastPathComponent ? lastPathComponent : key;
+  return lastPathComponent || key;
 };
