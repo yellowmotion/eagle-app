@@ -20,6 +20,8 @@ const DashboardData: FC<{}> = () => {
     hvTemp: null,
   });
 
+  const [timer, setTimer] = useState<Date | null>(null);
+
   useEffect(() => {
     const ctx: DashboardContextContent = {
       client: null,
@@ -29,7 +31,11 @@ const DashboardData: FC<{}> = () => {
       secondary_proto_root: null,
     };
 
-    const mqttCallback = (network: string, message: { [k: string]: any }) => {
+    setInterval(() => {
+      setTimer(new Date()); 
+    }, 200);  // Every 200ms
+
+    const mqttCallback = (_: string, message: { [k: string]: any }) => {
       setFields((prevFields) => {
         let newState: DashboardFields = { ...prevFields };
 
@@ -67,10 +73,13 @@ const DashboardData: FC<{}> = () => {
             }
             // console.log("HV CHARGE update " + newState.hvCharge);
           }
+          newState.lastUpdate = new Date();
         });
 
         return newState;
       });
+
+      setTimer(new Date());
     };
 
     connect(ctx, mqttCallback);
@@ -87,7 +96,7 @@ const DashboardData: FC<{}> = () => {
         </div>
         <p className="text-white text-lg pl-2">
           Delta:{" "}
-          {fields.lastUpdate != null ? fields.lastUpdate.getSeconds() : "Never"}{" "}
+          {timer != null && fields.lastUpdate != null ? Math.abs(timer.getMilliseconds() - fields.lastUpdate.getMilliseconds()) / 10.0 : "Never"}{" "}
           [s]
         </p>
       </div>
