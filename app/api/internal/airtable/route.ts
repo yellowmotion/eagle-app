@@ -6,7 +6,7 @@ import { plainToInstance } from 'class-transformer';
 
 /**
  * @swagger
- * /api/configurations/internal/airtable:
+ * /api/internal/airtable:
  *   post:
  *     summary: Send allowed users and roles from Airtable control panel to the database.
  *     description: Airtable control panel is used to manage users and roles. Every 10 minutes, Airtable pushes the users table on this endpoint. The endpoint will validate the request and save the data in the database. The platform must provide an authoriation bearer token in the request header.
@@ -40,19 +40,30 @@ import { plainToInstance } from 'class-transformer';
  *       500:
  *         description: Internal Server Error. Something went wrong on the server side
  */
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<Response> {
     if (!req.headers.has('Authorization')) {
         return new Response(null, { status: 401 });
     }
 
     const [prefix, token] = req.headers.get('Authorization')!.split(' ');
-    if (prefix != 'Bearer' && token != process.env.AIRTABLE_TOKEN) {
+
+    if (!prefix || !token || prefix !== 'Bearer' || token !== process.env.AIRTABLE_TOKEN) {
         return new Response(null, { status: 401 });
+    }
+
+    let body: { [key: string]: any };
+    try {
+        body = await req.json();
+    }
+    catch (e) {
+        return new Response(null, {
+            status: 400,
+        });
     }
 
     const payload: AirtableBodyRequest = plainToInstance(
         AirtableBodyRequest,
-        await req.json()
+        body
     );
 
     const errors = await validate(payload);
@@ -64,8 +75,8 @@ export async function POST(req: Request) {
 
     // Erase collection before putting new data
     let db = await getDatabase();
-    db.collection('roles').drop();
-    db.collection('roles').insertMany(payload.roles);
+    await db.collection('roles').drop();
+    await db.collection('roles').insertMany(payload.roles);
 
     return new Response(null, {
         status: 200,

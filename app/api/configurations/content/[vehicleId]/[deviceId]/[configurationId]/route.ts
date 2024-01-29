@@ -77,7 +77,7 @@ export async function GET(
   }
 
   const db = await getDatabase();
-  const collection = await db.collection('configurations');
+  const collection = db.collection('configurations');
 
   const result = await collection.findOne({
     vehicleId: params.vehicleId,
@@ -92,7 +92,6 @@ export async function GET(
   const config = plainToInstance(ConfigurationMongoContent, result);
   const errors = await validate(config);
   if (errors.length > 0) {
-    errors.forEach(console.error)
     return new NextResponse(null, { status: 500 });
   }
 
@@ -101,6 +100,7 @@ export async function GET(
     headers: {
       'Content-Type': 'application/json',
       'Last-Modified': config.lastUpdate,
+      'X-Modified-By': config.lastUpdate,
       'X-VehicleId': config.vehicleId,
       'X-DeviceId': config.deviceId,
       'X-ConfigurationId': config.configurationId,
@@ -248,6 +248,7 @@ export async function POST(
   { params }: { params: RouteParams }
 ) {
   const token = await getJWT(req);
+
   if (!token) {
     return new NextResponse(null, { status: 401 });
   }
@@ -280,21 +281,26 @@ export async function POST(
 
   const res = await fetch(binding.url, { cache: 'force-cache' });
   if (!res.ok) {
-    console.error('request');
     return new NextResponse(null, { status: 500 });
   }
 
-  const schema = await res.json();
+  let schema: { [key: string]: any };
+  try {
+    schema = await res.json();
+  }
+  catch (e) {
+    return new NextResponse(null, { status: 500 });
+  }
 
   const validator = new Validator();
   const isValidSchema = validator.validate(content, schema);
 
-  if (!isValidSchema) {
+  if (isValidSchema.errors.length > 0) {
     return new NextResponse(null, { status: 400 });
   }
 
   const configurationsCollection = await db.collection('configurations');
-  await configurationsCollection.replaceOne(
+  const { modifiedCount } = await configurationsCollection.replaceOne(
     {
       vehicleId: params.vehicleId,
       deviceId: params.deviceId,
@@ -309,8 +315,14 @@ export async function POST(
       updatedBy: 'null@null.nil', // TODO: Change with authenticated user's email
       lastUpdate: new Date().toUTCString(),
     },
-    { upsert: true }
-  ); // TODO: Add insert error check
+    { upsert: false }
+  ); 
+
+  // If replaceOne() returns acknowledged = false, it means that the configuration has not been found
+  // so we return a 404 Not Found
+  if (modifiedCount === 0) {
+    return new NextResponse(null, { status: 404 });
+  }
 
   return new NextResponse(null, { status: 200 });
 }
