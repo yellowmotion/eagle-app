@@ -15,7 +15,8 @@ const config: Config = {
   collectCoverageFrom: [
     'app/api/**/*.{ts,tsx}',
     '!app/api/auth/**/*.{ts,tsx}',
-  ]
+    'lib/utils.ts'
+  ],
 }
  
 export default createJestConfig(config)
