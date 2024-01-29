@@ -109,7 +109,6 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
  *       401:
  *         description: Unauthorized. Probably missing or invalid JWT token
  */
-
 export async function GET(req: NextRequest): Promise<NextResponse> {
   
   const token = await getJWT(req)

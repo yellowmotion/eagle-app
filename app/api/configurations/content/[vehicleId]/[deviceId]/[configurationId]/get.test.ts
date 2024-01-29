@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { GET } from './route'
 import { expect, test, describe, beforeAll, afterAll } from '@jest/globals';
 
-// Path: /api/configurations/content/:vehicleId/:deviceId/:configurationId
+// Path: /api/devices
 
 describe('GET /api/configurations/content/:vehicleId/:deviceId/:configurationId', () => {
 
