@@ -9,7 +9,7 @@ import { RouteParams } from "./types"
  *   get:
  *     summary: Retrieve info about a specific device
  *     description: Retrieve info about a specific device. The device must provide the vehicleId and deviceId in the URL. The device must also provide a valid JWT token in the Authorization header. The device must be registered in the database, otherwise the request will be rejected.
- *     tags: [Configurations]
+ *     tags: [Devices]
  *     parameters:
  *       - in: path
  *         name: vehicleId
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest, { params }: { params: RouteParams })
  *   delete:
  *     summary: Delete an owned specific device
  *     description: Delete an owned specific device. The device must provide the vehicleId and deviceId in the URL. The device must also provide a valid JWT token in the Authorization header. The device must be registered in the database, otherwise the request will be rejected.
- *     tags: [Configurations]
+ *     tags: [Devices]
  *     parameters:
  *       - in: path
  *         name: vehicleId
