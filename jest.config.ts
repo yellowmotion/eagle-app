@@ -13,7 +13,7 @@ const config: Config = {
   },
   collectCoverage: true,
   collectCoverageFrom: [
-    'app/api/**/*.{ts,tsx}',
+    'app/api/**/route.{ts,tsx}',
     '!app/api/auth/**/*.{ts,tsx}',
     'lib/utils.ts'
   ],
