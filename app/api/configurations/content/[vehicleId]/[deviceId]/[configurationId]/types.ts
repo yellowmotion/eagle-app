@@ -37,3 +37,14 @@ export class ConfigurationMongoContent {
   @IsString()
   lastUpdate!: string;
 }
+
+export class ApiPostBody {
+
+  @IsString()
+  @Length(40)
+  configurationVersionHash!: string;
+
+  @IsNotEmpty()
+  @IsObject()
+  content!: object;
+}

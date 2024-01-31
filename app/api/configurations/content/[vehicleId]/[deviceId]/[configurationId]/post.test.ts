@@ -19,11 +19,14 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
     const req = new Request('http://domain/api/configurations/content/vehicle/device/configuration', {
       method: 'POST',
       headers: {
-        'X-ConfigurationVersionHash': `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        temperature: 20,
-        humidity: 40
+        configurationVersionHash: `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`,
+        content: {
+          temperature: 20,
+          humidity: 40
+        }
       })
     })
 
@@ -44,11 +47,13 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ',
-        'X-ConfigurationVersionHash': `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`
       },
       body: JSON.stringify({
-        temperature: 20,
-        humidity: 40
+        configurationVersionHash: `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`,
+        content: {
+          temperature: 20,
+          humidity: 40
+        }
       })
     })
 
@@ -69,11 +74,13 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
       method: 'POST',
       headers: {
         'Authorization': 'Bearer surelynotavalidtoken',
-        'X-ConfigurationVersionHash': `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`
       },
       body: JSON.stringify({
-        temperature: 20,
-        humidity: 40
+        configurationVersionHash: `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`,
+        content: {
+          temperature: 20,
+          humidity: 40
+        }
       })
     })
 
@@ -94,11 +101,13 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
       method: 'POST',
       headers: {
         'Authorization': `Beer ${process.env.TESTING_VALID_TOKEN}`,
-        'X-ConfigurationVersionHash': `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`
       },
       body: JSON.stringify({
-        temperature: 20,
-        humidity: 40
+        configurationVersionHash: `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`,
+        content: {
+          temperature: 20,
+          humidity: 40
+        }
       })
     })
 
@@ -113,7 +122,7 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
     expect(res.status).toBe(401)  // Bad Request
   })
 
-  test('Request without X-ConfigurationVersionHash header', async () => {
+  test('Request without configurationVersionHash field', async () => {
     
     const req = new Request('http://domain/api/configurations/content/vehicle/device/configuration', {
       method: 'POST',
@@ -121,8 +130,10 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
         'Authorization': `Bearer ${process.env.TESTING_VALID_TOKEN}`
       },
       body: JSON.stringify({
-        temperature: 20,
-        humidity: 40
+        content: {
+          temperature: 20,
+          humidity: 40
+        }
       })
     })
 
@@ -143,11 +154,13 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.TESTING_VALID_TOKEN}`,
-        'X-ConfigurationVersionHash': `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`
       },
       body: JSON.stringify({
-        temperature: 20,
-        humidity: 40
+        configurationVersionHash: `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`,
+        content: {
+          temperature: 20,
+          humidity: 40
+        }
       })
     })
 
@@ -168,11 +181,13 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.TESTING_VALID_TOKEN}`,
-        'X-ConfigurationVersionHash': `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`
       },
       body: JSON.stringify({
-        temperature: 20,
-        humidity: 40
+        configurationVersionHash: `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`,
+        content: {
+          temperature: 20,
+          humidity: 40
+        }
       })
     })
 
@@ -193,11 +208,13 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.TESTING_VALID_TOKEN}`,
-        'X-ConfigurationVersionHash': `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`
       },
       body: JSON.stringify({
-        temperature: 20,
-        humidity: 40
+        configurationVersionHash: `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`,
+        content: {
+          temperature: 20,
+          humidity: 40
+        }
       })
     })
 
@@ -218,11 +235,13 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.TESTING_VALID_TOKEN}`,
-        'X-ConfigurationVersionHash': `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`
       },
       body: JSON.stringify({
-        temperature: 20,
-        humidity: 'not a number'
+        configurationVersionHash: `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`,
+        content: {
+          temperature: 20,
+          humidity: 'not a number'
+        }
       })
     })
 
@@ -243,11 +262,13 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.TESTING_VALID_TOKEN}`,
-        'X-ConfigurationVersionHash': `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`
       },
       body: JSON.stringify({
-        temperature: 20,
-        humidity: 40
+        configurationVersionHash: `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`,
+        content: {
+          temperature: 20,
+          humidity: 40
+        }
       })
     })
 
@@ -268,11 +289,13 @@ describe('POST /api/configurations/content/:vehicleId/:deviceId/:configurationId
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.TESTING_VALID_TOKEN}`,
-        'X-ConfigurationVersionHash': `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`
       },
       body: JSON.stringify({
-        temperature: 20,
-        humidity: 40
+        configurationVersionHash: `${process.env.TESTING_CONFIGURATION_VERSION_HASH}`,
+        content: {
+          temperature: 20,
+          humidity: 40
+        }
       })
     })
 

@@ -3,7 +3,7 @@ import { getDatabase } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
-import { ConfigurationMongoContent, RouteParams } from './types';
+import { ApiPostBody, ConfigurationMongoContent, RouteParams } from './types';
 import { SchemaBindingMongoContent } from '@/app/api/configurations/schema/[hash]/[configurationId]/types';
 import { Validator } from 'jsonschema';
 import { getJWT } from '@/lib/auth';
@@ -38,28 +38,45 @@ import { getJWT } from '@/lib/auth';
  *           Content-Type:
  *             description: Content type of the response
  *             value: application/json
- *             schema:
- *               type: string
  *           Last-Modified:
  *             description: Last modification date of the configuration
+ *         content:
+ *           application/json:
+ *             description: Contains the configuration content with additional informations about creation date, last update date and last update author
  *             schema:
- *               type: string
- *           X-VehicleId:
- *             description: The vehicle id of the configuration
- *             schema:
- *               type: string
- *           X-DeviceId:
- *             description: The device id of the configuration
- *             schema:
- *               type: string
- *           X-ConfigurationId:
- *             description: The configuration id searched
- *             schema:
- *               type: string
- *           X-ConfigurationVersionHash:
- *             description: Configuration has versioning. This is the hash of the version of the configuration
- *             schema:
- *               type: string
+ *               type: object
+ *               properties:
+ *                 vehicleId:
+ *                   type: string 
+ *                   description: Vehicle ID 
+ *                 deviceId:
+ *                   type: string 
+ *                   description: Device ID
+ *                 configurationId:
+ *                   type: string 
+ *                   description: Configuration ID 
+ *                 configurationVersionHash: 
+ *                   type: string 
+ *                   description: Configuration version hash 
+ *                 content:
+ *                   type: object
+ *                   description: Configuration content 
+ *                 updatedBy:
+ *                   type: string 
+ *                   description: Email of the user who last updated the configuration 
+ *                 lastUpdate: 
+ *                   type: string 
+ *                   description: Last update date of the configuration. UTF format
+ *             example: 
+ *               vehicleId: vehicle 
+ *               deviceId: device
+ *               configurationId: configuration  
+ *               configurationVersionHash: 0123456789abcdef0123456789abcdef01234567
+ *               content:
+ *                 key: 123
+ *                 key2: value2
+ *               updatedBy: someone@domain.tld
+ *               lastUpdate: Wed, 21 Oct 2015 07:28:00 GMT
  *       401:
  *         description: Unauthorized. Probably missing or invalid JWT token
  *       404:
@@ -95,16 +112,11 @@ export async function GET(
     return new NextResponse(null, { status: 500 });
   }
 
-  return new NextResponse(JSON.stringify(config.content), {
+  return new NextResponse(JSON.stringify(config), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
       'Last-Modified': config.lastUpdate,
-      'X-Modified-By': config.lastUpdate,
-      'X-VehicleId': config.vehicleId,
-      'X-DeviceId': config.deviceId,
-      'X-ConfigurationId': config.configurationId,
-      'X-ConfigurationVersionHash': config.configurationVersionHash,
     },
   });
 }
@@ -138,24 +150,6 @@ export async function GET(
  *         headers:
  *           Last-Modified:
  *             description: Last modification date of the configuration
- *             schema:
- *               type: string
- *           X-VehicleId:
- *             description: The vehicle id of the configuration
- *             schema:
- *               type: string
- *           X-DeviceId:
- *             description: The device id of the configuration
- *             schema:
- *               type: string
- *           X-ConfigurationId:
- *             description: The configuration id searched
- *             schema:
- *               type: string
- *           X-ConfigurationVersionHash:
- *             description: Configuration has versioning. This is the hash of the version of the configuration
- *             schema:
- *               type: string
  *       401:
  *         description: Unauthorized. Probably missing or invalid JWT token
  *       404:
@@ -232,7 +226,17 @@ export async function HEAD(
  *       content:
  *         application/json:
  *           description: A valid JSON object
- *           example: { "key": "value" }
+ *           schema:
+ *             type: object
+ *             properties:
+ *               configurationVersionHash:
+ *                 type: string 
+ *                 description: Configuration version hash
+ *               content:
+ *                 type: object
+ *                 description: Configuration Content
+ *             additionalProperties: false
+ *           example: { "configurationVersionHash": "0123456789abcdef0123456789abcdef01234567", "content": { "key": "value" } }
  *     responses:
  *       200:
  *         description: Ok. Configuration has been saved
@@ -253,10 +257,16 @@ export async function POST(
     return new NextResponse(null, { status: 401 });
   }
 
-  const content = await req.json();
-  const versionHash = req.headers.get('X-ConfigurationVersionHash');
-
-  if (!versionHash) {
+  let postBodyBinding: ApiPostBody;
+  try {
+    const content = await req.json();
+    postBodyBinding = plainToInstance(ApiPostBody, content);
+    const errors = await validate(postBodyBinding);
+    if (errors.length > 0) {
+      return new NextResponse(null, { status: 400 });
+    }
+  }
+  catch (e) {
     return new NextResponse(null, { status: 400 });
   }
 
@@ -277,7 +287,7 @@ export async function POST(
     return new NextResponse(null, { status: 500 });
   }
 
-  binding.url = binding.url.replace('{hash}', versionHash);
+  binding.url = binding.url.replace('{hash}', postBodyBinding.configurationVersionHash);
 
   const res = await fetch(binding.url, { cache: 'force-cache' });
   if (!res.ok) {
@@ -293,13 +303,13 @@ export async function POST(
   }
 
   const validator = new Validator();
-  const isValidSchema = validator.validate(content, schema);
+  const isValidSchema = validator.validate(postBodyBinding.content, schema);
 
   if (isValidSchema.errors.length > 0) {
     return new NextResponse(null, { status: 400 });
   }
 
-  const configurationsCollection = await db.collection('configurations');
+  const configurationsCollection = db.collection('configurations');
   const { modifiedCount } = await configurationsCollection.replaceOne(
     {
       vehicleId: params.vehicleId,
@@ -310,16 +320,15 @@ export async function POST(
       vehicleId: params.vehicleId,
       deviceId: params.deviceId,
       configurationId: params.configurationId,
-      configurationVersionHash: versionHash,
-      content: content,
-      updatedBy: 'null@null.nil', // TODO: Change with authenticated user's email
+      configurationVersionHash: postBodyBinding.configurationVersionHash,
+      content: postBodyBinding.content,
+      updatedBy: token.email,
       lastUpdate: new Date().toUTCString(),
     },
     { upsert: false }
   ); 
 
   // If replaceOne() returns acknowledged = false, it means that the configuration has not been found
-  // so we return a 404 Not Found
   if (modifiedCount === 0) {
     return new NextResponse(null, { status: 404 });
   }
