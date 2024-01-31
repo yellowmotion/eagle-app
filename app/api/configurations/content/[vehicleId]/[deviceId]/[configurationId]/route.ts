@@ -263,7 +263,7 @@ export async function POST(
     postBodyBinding = plainToInstance(ApiPostBody, content);
     const errors = await validate(postBodyBinding);
     if (errors.length > 0) {
-      return new NextResponse(null, { status: 400 });
+      throw new Error();
     }
   }
   catch (e) {
@@ -271,7 +271,7 @@ export async function POST(
   }
 
   const db = await getDatabase();
-  const schemaCollection = await db.collection('schemabindings');
+  const schemaCollection = db.collection('schemabindings');
 
   const result = await schemaCollection.findOne({
     configurationId: params.configurationId,

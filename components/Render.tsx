@@ -11,7 +11,6 @@ import { schemaResolve, contentDefaultValues, groupKeys, splitKeyDisplay } from 
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -52,7 +51,7 @@ const Render = ({
     queryKey: [configurationId, "schema"],
     queryFn: async () => {
       const response = await axios.get(
-        `/api/configurations/schema/${configContent.data?.headers["x-configurationversionhash"]}/${configurationId}`
+        `/api/configurations/schema/${configContent.data?.data.configurationVersionHash}/${configurationId}`
       );
       return response;
     },
@@ -64,11 +63,13 @@ const Render = ({
       toastId = toast.loading("Saving configuration...");
       const response = await axios.post(
         `/api/configurations/content/${vehicleId}/${deviceId}/${configurationId}`,
-        values,
+        { 
+          configurationVersionHash: configContent.data?.data.configurationVersionHash,
+          content: values,
+        },
         {
           headers: {
-            "X-ConfigurationVersionHash":
-              configContent.data?.headers["x-configurationversionhash"],
+            'Content-Type': 'application/json'
           },
         }
       );
@@ -96,8 +97,8 @@ const Render = ({
       setSchema(schemaResolve(configSchema.data.data, configSchema.data.data));
     }
     if (configContent.data && configContent.isSuccess) {
-      setContent(configContent.data.data);
-      form.reset(contentDefaultValues(schema, configContent.data.data));
+      setContent(configContent.data.data.content);
+      form.reset(contentDefaultValues(schema, configContent.data.data.content));
     }
   }, [
     configSchema.data,
