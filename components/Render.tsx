@@ -87,7 +87,7 @@ const Render = ({
 
   const handleRefresh = () => {
     toastId = toast.loading("Fetching...");
-    configContent.refetch;
+    configContent.refetch();
     toast.dismiss(toastId);
     toast.success("Configuration fetched!");
   }
@@ -176,7 +176,8 @@ const Render = ({
                   <Checkbox
                     {...field}
                     checked={
-                      configContent !== undefined ? configContent : false
+                      field.value
+                      // configContent !== undefined ? configContent : false
                     }
                     onCheckedChange={(checked) => {
                       configContent = checked;
