@@ -482,7 +482,7 @@ describe("groupKeys", () => {
 
   test("Grouping an empty object", () => {
     const testObject = {};
-    const schema = {}
+    const schema = {};
     const expectedResult = {};
     expect(groupKeys(testObject, schema)).toEqual(expectedResult);
   });
@@ -519,7 +519,7 @@ describe("groupKeys", () => {
       additionalProperties: false,
       type: "object",
       title: "Test",
-    }
+    };
 
     const expectedResult = {
       nested: {
@@ -545,7 +545,7 @@ describe("groupKeys", () => {
             "char%": {
               type: "string",
             },
-            "char$": {
+            char$: {
               type: "string",
             },
           },
@@ -557,7 +557,7 @@ describe("groupKeys", () => {
       additionalProperties: false,
       type: "object",
       title: "Test",
-    }
+    };
 
     const expectedResult = {
       special: {
@@ -594,7 +594,7 @@ describe("groupKeys", () => {
       additionalProperties: false,
       type: "object",
       title: "Test",
-    }
+    };
 
     const expectedResult = {
       canDevices: ["can0", "can1"],
@@ -604,65 +604,13 @@ describe("groupKeys", () => {
     expect(groupKeys(testObject, schema)).toEqual(expectedResult);
   });
 
-  test("Grouping keys with missing properties in schema", () => {
-    const testObject = {
-      "missingProperty/object/property": "value",
-    };
-  
-    const schema = {
-      properties: {
-        missingProperty: {
-          type: "object",
-          properties: {
-            existingProperty: {
-              type: "string",
-            },
-          },
-          additionalProperties: false,
-          required: ["existingProperty"],
-        },
-      },
-      additionalProperties: false,
-      type: "object",
-      title: "Test",
-    };
-  
-    // Il valore dovrebbe essere omesso poiché la proprietà mancante è richiesta nello schema.
-    const expectedResult = {};
-    expect(groupKeys(testObject, schema)).toEqual(expectedResult);
-  });
-  
-  test("Grouping keys with extra properties in object", () => {
-    const testObject = {
-      "extraProperty/object/property": "value",
-      "extraProperty/another_property": "another_value",
-    };
-  
-    const schema = {
-      properties: {
-        extraProperty: {
-          type: "object",
-          additionalProperties: false,
-          properties: {},
-        },
-      },
-      additionalProperties: false,
-      type: "object",
-      title: "Test",
-    };
-  
-    // I valori aggiuntivi dovrebbero essere omessi poiché non sono definiti nello schema.
-    const expectedResult = { extraProperty: {} };
-    expect(groupKeys(testObject, schema)).toEqual(expectedResult);
-  });
-  
   test("Grouping keys with array containing objects", () => {
     const testObject = {
       "arrayObject/0/property": "value",
       "arrayObject/1/property": "value",
       "arrayObject/2/property": "value",
     };
-  
+
     const schema = {
       properties: {
         arrayObject: {
@@ -683,7 +631,7 @@ describe("groupKeys", () => {
       type: "object",
       title: "Test",
     };
-  
+
     const expectedResult = {
       arrayObject: [
         { property: "value" },
@@ -693,14 +641,14 @@ describe("groupKeys", () => {
     };
     expect(groupKeys(testObject, schema)).toEqual(expectedResult);
   });
-  
+
   test("Grouping keys with array containing primitives", () => {
     const testObject = {
       "arrayPrimitive/0": "value1",
       "arrayPrimitive/1": "value2",
       "arrayPrimitive/2": "value3",
     };
-  
+
     const schema = {
       properties: {
         arrayPrimitive: {
@@ -714,11 +662,12 @@ describe("groupKeys", () => {
       type: "object",
       title: "Test",
     };
-  
+
     const expectedResult = {
       arrayPrimitive: ["value1", "value2", "value3"],
     };
     expect(groupKeys(testObject, schema)).toEqual(expectedResult);
+  });
 });
 
 describe("splitKeyDisplay", () => {

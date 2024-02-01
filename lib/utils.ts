@@ -115,7 +115,7 @@ export const contentDefaultValues = (schema: any, content: any): any => {
 export const groupKeys = (obj: Record<string, any>, schema: any): any => {
   const result = {};
   if (!schema.properties) {
-    return;
+    return result;
   }
   const properties = schema.properties;
 
