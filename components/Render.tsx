@@ -1,8 +1,8 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 
 import { useForm } from "react-hook-form";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 
@@ -21,10 +21,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Icons } from "@/components/Icons";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { ConfigHandler } from "@/components/ConfigHandler";
+import { Button } from "./ui/button";
 
 const Render = ({
   vehicleId,
@@ -37,6 +39,9 @@ const Render = ({
 }) => {
   const [schema, setSchema] = React.useState<any>({});
   const [content, setContent] = React.useState<any>({});
+  const [lastModified, setLastModified] = React.useState<number>(
+    new Date().getTime()
+  );
   const form = useForm({
     defaultValues: contentDefaultValues(schema, content),
   });
@@ -57,6 +62,18 @@ const Render = ({
     queryFn: async () => {
       const response = await axios.get(
         `/api/configurations/schema/${configContent.data?.data.configurationVersionHash}/${configurationId}`
+      );
+      return response;
+    },
+    enabled: !!configContent.data,
+  });
+
+  const lastModifiedQuery = useQuery({
+    queryKey: ["lastModified", vehicleId, deviceId, configurationId],
+    refetchInterval: 5000,
+    queryFn: async () => {
+      const response = await axios.head(
+        `/api/configurations/content/${vehicleId}/${deviceId}/${configurationId}`
       );
       return response;
     },
@@ -84,6 +101,7 @@ const Render = ({
     onSuccess: () => {
       toast.dismiss(toastId);
       toast.success("Configuration saved!");
+      setLastModified(new Date().getTime());
     },
     onError: () => {
       toast.dismiss(toastId);
@@ -91,16 +109,18 @@ const Render = ({
     },
   });
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     toastId = toast.loading("Fetching...");
     configContent.refetch();
+    setLastModified(new Date().getTime());
     toast.dismiss(toastId);
     toast.success("Configuration fetched!");
-  };
+  }, [configContent]);
 
   useEffect(() => {
     if (configSchema.data && configSchema.isSuccess) {
       setSchema(schemaResolve(configSchema.data.data, configSchema.data.data));
+      setLastModified(new Date().getTime());
     }
     if (configContent.data && configContent.isSuccess) {
       setContent(configContent.data.data.content);
@@ -113,6 +133,54 @@ const Render = ({
     configContent.isSuccess,
     form,
     schema,
+  ]);
+
+  useEffect(() => {
+    if (lastModifiedQuery.data && lastModifiedQuery.isSuccess) {
+      if (
+        new Date(lastModifiedQuery.data.headers["last-modified"]).getTime() >
+        lastModified
+      ) {
+        toast.custom(
+          (t) => (
+            <div
+              className={`${
+                t.visible ? "animate-enter" : "animate-leave"
+              } bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5 px-2 py-1`}
+            >
+              <div className="flex items-center justify-center p-2">
+                <Icons.bell className="w-6 h-6  text-black" />
+              </div>
+              <div className="p-2 flex flex-col items-center justify-center">
+                <p className="text-black">Update available</p>
+              </div>
+              <div className="p-2">
+                <Button
+                  variant="reversed"
+                  onClick={() => {
+                    toast.remove(t.id);
+                    handleRefresh();
+                  }}
+                >
+                  Accept
+                </Button>
+              </div>
+            </div>
+          ),
+          {
+            duration: 5000,
+          }
+        );
+        setLastModified(
+          new Date(lastModifiedQuery.data.headers["last-modified"]).getTime()
+        );
+      }
+    }
+  }, [
+    lastModifiedQuery.data,
+    lastModifiedQuery.isSuccess,
+    lastModified,
+    handleRefresh,
   ]);
 
   function onSubmit(values: any) {
