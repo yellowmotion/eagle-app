@@ -6,7 +6,12 @@ import axios, { AxiosResponse } from "axios";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 
-import { schemaResolve, contentDefaultValues, groupKeys, splitKeyDisplay } from "@/lib/utils";
+import {
+  schemaResolve,
+  contentDefaultValues,
+  groupKeys,
+  splitKeyDisplay,
+} from "@/lib/utils";
 
 import {
   Form,
@@ -63,13 +68,14 @@ const Render = ({
       toastId = toast.loading("Saving configuration...");
       const response = await axios.post(
         `/api/configurations/content/${vehicleId}/${deviceId}/${configurationId}`,
-        { 
-          configurationVersionHash: configContent.data?.data.configurationVersionHash,
+        {
+          configurationVersionHash:
+            configContent.data?.data.configurationVersionHash,
           content: values,
         },
         {
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
           },
         }
       );
@@ -90,7 +96,7 @@ const Render = ({
     configContent.refetch();
     toast.dismiss(toastId);
     toast.success("Configuration fetched!");
-  }
+  };
 
   useEffect(() => {
     if (configSchema.data && configSchema.isSuccess) {
@@ -110,7 +116,13 @@ const Render = ({
   ]);
 
   function onSubmit(values: any) {
-    mutation.mutate(groupKeys(values));
+    if (form.formState.isDirty) {
+      mutation.mutate(groupKeys(values, schema));
+    } else {
+      toast("No changes made", {
+        icon: "✏️",
+      });
+    }
   }
 
   const render = (configSchema: any, configContent: any, key: string) => {
@@ -123,7 +135,9 @@ const Render = ({
             name={key}
             render={({ field }) => (
               <FormItem className="py-2">
-                <FormLabel className="capitalize">{(label as string).replace(/\d+$/, "")}</FormLabel>
+                <FormLabel className="capitalize">
+                  {(label as string).replace(/\d+$/, "")}
+                </FormLabel>
                 <FormControl>
                   <Input
                     placeholder={configContent}

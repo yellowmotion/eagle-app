@@ -284,6 +284,151 @@ describe("groupKeys", () => {
       "gpsDevices/1/enabled": false,
     };
 
+    const schema = {
+      required: [
+        "cameraEnabled",
+        "generateCsv",
+        "connection",
+        "connectionSettings",
+        "canDevices",
+        "gpsDevices",
+      ],
+      properties: {
+        cameraEnabled: {
+          type: "boolean",
+        },
+        generateCsv: {
+          type: "boolean",
+        },
+        connection: {
+          required: [
+            "ip",
+            "port",
+            "mode",
+            "whoamiUrl",
+            "tlsEnabled",
+            "cafile",
+            "capath",
+            "certfile",
+            "keyfile",
+          ],
+          properties: {
+            ip: {
+              type: "string",
+            },
+            port: {
+              type: "string",
+            },
+            mode: {
+              type: "string",
+            },
+            whoamiUrl: {
+              type: "string",
+            },
+            tlsEnabled: {
+              type: "boolean",
+            },
+            cafile: {
+              type: "string",
+            },
+            capath: {
+              type: "string",
+            },
+            certfile: {
+              type: "string",
+            },
+            keyfile: {
+              type: "string",
+            },
+          },
+          additionalProperties: false,
+          type: "object",
+          title: "Connection",
+        },
+        connectionSettings: {
+          required: [
+            "enabled",
+            "downsampleEnabled",
+            "downsampleSkipData",
+            "downsampleMps",
+            "sendRate",
+            "sendSensorData",
+          ],
+          properties: {
+            enabled: {
+              type: "boolean",
+            },
+            downsampleEnabled: {
+              type: "boolean",
+            },
+            downsampleSkipData: {
+              type: "boolean",
+            },
+            downsampleMps: {
+              type: "integer",
+            },
+            sendRate: {
+              type: "integer",
+            },
+            sendSensorData: {
+              type: "boolean",
+            },
+          },
+          additionalProperties: false,
+          type: "object",
+          title: "Connection Settings",
+        },
+        canDevices: {
+          items: {
+            required: ["socket", "name", "networks"],
+            properties: {
+              socket: {
+                type: "string",
+              },
+              name: {
+                type: "string",
+              },
+              networks: {
+                items: {
+                  type: "string",
+                },
+                type: "array",
+              },
+            },
+            additionalProperties: false,
+            type: "object",
+            title: "Can Device",
+          },
+          additionalProperties: false,
+          type: "array",
+        },
+        gpsDevices: {
+          items: {
+            required: ["address", "mode", "enabled"],
+            properties: {
+              address: {
+                type: "string",
+              },
+              mode: {
+                type: "string",
+              },
+              enabled: {
+                type: "boolean",
+              },
+            },
+            additionalProperties: false,
+            type: "object",
+            title: "Gps Device",
+          },
+          additionalProperties: false,
+          type: "array",
+        },
+      },
+      additionalProperties: false,
+      type: "object",
+      title: "Telemetry Config",
+    };
+
     const expectedResult = {
       cameraEnabled: true,
       generateCsv: false,
@@ -332,13 +477,14 @@ describe("groupKeys", () => {
       ],
     };
 
-    expect(groupKeys(testObject)).toEqual(expectedResult);
+    expect(groupKeys(testObject, schema)).toEqual(expectedResult);
   });
 
   test("Grouping an empty object", () => {
     const testObject = {};
+    const schema = {}
     const expectedResult = {};
-    expect(groupKeys(testObject)).toEqual(expectedResult);
+    expect(groupKeys(testObject, schema)).toEqual(expectedResult);
   });
 
   test("Grouping nested objects with non-empty values", () => {
@@ -346,6 +492,35 @@ describe("groupKeys", () => {
       "nested/nonempty/value": "test",
       "nested/nonempty/anotherValue": "anotherTest",
     };
+
+    const schema = {
+      properties: {
+        nested: {
+          properties: {
+            nonempty: {
+              properties: {
+                value: {
+                  type: "string",
+                },
+                anotherValue: {
+                  type: "string",
+                },
+              },
+              additionalProperties: false,
+              type: "object",
+              title: "Nonempty",
+            },
+          },
+          additionalProperties: false,
+          type: "object",
+          title: "Nested",
+        },
+      },
+      additionalProperties: false,
+      type: "object",
+      title: "Test",
+    }
+
     const expectedResult = {
       nested: {
         nonempty: {
@@ -354,7 +529,7 @@ describe("groupKeys", () => {
         },
       },
     };
-    expect(groupKeys(testObject)).toEqual(expectedResult);
+    expect(groupKeys(testObject, schema)).toEqual(expectedResult);
   });
 
   test("Grouping keys containing special characters", () => {
@@ -362,13 +537,35 @@ describe("groupKeys", () => {
       "special/char%": "test1",
       "special/char$": "test2",
     };
+
+    const schema = {
+      properties: {
+        special: {
+          properties: {
+            "char%": {
+              type: "string",
+            },
+            "char$": {
+              type: "string",
+            },
+          },
+          additionalProperties: false,
+          type: "object",
+          title: "Special",
+        },
+      },
+      additionalProperties: false,
+      type: "object",
+      title: "Test",
+    }
+
     const expectedResult = {
       special: {
         "char%": "test1",
         char$: "test2",
       },
     };
-    expect(groupKeys(testObject)).toEqual(expectedResult);
+    expect(groupKeys(testObject, schema)).toEqual(expectedResult);
   });
 
   test("Grouping array", () => {
@@ -378,13 +575,150 @@ describe("groupKeys", () => {
       "gpsDevices/0": "GPS1_Address",
       "gpsDevices/1": "GPS2_Address",
     };
+
+    const schema = {
+      properties: {
+        canDevices: {
+          items: {
+            type: "string",
+          },
+          type: "array",
+        },
+        gpsDevices: {
+          items: {
+            type: "string",
+          },
+          type: "array",
+        },
+      },
+      additionalProperties: false,
+      type: "object",
+      title: "Test",
+    }
+
     const expectedResult = {
       canDevices: ["can0", "can1"],
       gpsDevices: ["GPS1_Address", "GPS2_Address"],
     };
 
-    expect(groupKeys(testObject)).toEqual(expectedResult);
+    expect(groupKeys(testObject, schema)).toEqual(expectedResult);
   });
+
+  test("Grouping keys with missing properties in schema", () => {
+    const testObject = {
+      "missingProperty/object/property": "value",
+    };
+  
+    const schema = {
+      properties: {
+        missingProperty: {
+          type: "object",
+          properties: {
+            existingProperty: {
+              type: "string",
+            },
+          },
+          additionalProperties: false,
+          required: ["existingProperty"],
+        },
+      },
+      additionalProperties: false,
+      type: "object",
+      title: "Test",
+    };
+  
+    // Il valore dovrebbe essere omesso poiché la proprietà mancante è richiesta nello schema.
+    const expectedResult = {};
+    expect(groupKeys(testObject, schema)).toEqual(expectedResult);
+  });
+  
+  test("Grouping keys with extra properties in object", () => {
+    const testObject = {
+      "extraProperty/object/property": "value",
+      "extraProperty/another_property": "another_value",
+    };
+  
+    const schema = {
+      properties: {
+        extraProperty: {
+          type: "object",
+          additionalProperties: false,
+          properties: {},
+        },
+      },
+      additionalProperties: false,
+      type: "object",
+      title: "Test",
+    };
+  
+    // I valori aggiuntivi dovrebbero essere omessi poiché non sono definiti nello schema.
+    const expectedResult = { extraProperty: {} };
+    expect(groupKeys(testObject, schema)).toEqual(expectedResult);
+  });
+  
+  test("Grouping keys with array containing objects", () => {
+    const testObject = {
+      "arrayObject/0/property": "value",
+      "arrayObject/1/property": "value",
+      "arrayObject/2/property": "value",
+    };
+  
+    const schema = {
+      properties: {
+        arrayObject: {
+          items: {
+            type: "object",
+            properties: {
+              property: {
+                type: "string",
+              },
+            },
+            additionalProperties: false,
+            required: ["property"],
+          },
+          type: "array",
+        },
+      },
+      additionalProperties: false,
+      type: "object",
+      title: "Test",
+    };
+  
+    const expectedResult = {
+      arrayObject: [
+        { property: "value" },
+        { property: "value" },
+        { property: "value" },
+      ],
+    };
+    expect(groupKeys(testObject, schema)).toEqual(expectedResult);
+  });
+  
+  test("Grouping keys with array containing primitives", () => {
+    const testObject = {
+      "arrayPrimitive/0": "value1",
+      "arrayPrimitive/1": "value2",
+      "arrayPrimitive/2": "value3",
+    };
+  
+    const schema = {
+      properties: {
+        arrayPrimitive: {
+          items: {
+            type: "string",
+          },
+          type: "array",
+        },
+      },
+      additionalProperties: false,
+      type: "object",
+      title: "Test",
+    };
+  
+    const expectedResult = {
+      arrayPrimitive: ["value1", "value2", "value3"],
+    };
+    expect(groupKeys(testObject, schema)).toEqual(expectedResult);
 });
 
 describe("splitKeyDisplay", () => {

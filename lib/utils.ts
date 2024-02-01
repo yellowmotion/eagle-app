@@ -4,7 +4,12 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
+/**
+ * Composes the schema by resolving any `$ref` references recursively within the given schema object.
+ * @param schema The schema object returned by the API, which may contain `$ref` references.
+ * @param root A reference to the original schema object passed to the first call of `schemaResolve`, used to access its fields during recursive operations.
+ * @returns A composed schema object with resolved `$ref` references.
+ */
 export const schemaResolve = (schema: any, root: any) => {
   if (!schema) {
     return schema;
@@ -42,6 +47,13 @@ export const schemaResolve = (schema: any, root: any) => {
   }
 };
 
+/**
+ * Flattens an object schema by recursively extracting its properties into a flat key-value structure.
+ * @param obj The object schema to be flattened.
+ * @param content The content corresponding to the object schema.
+ * @param parentKey The parent key of the current object schema (used for building nested keys).
+ * @returns A flat key-value structure representing the flattened object schema.
+ */
 const flattenObject = (obj: any, content: any, parentKey: string): any => {
   if (obj.type === "object") {
     return Object.keys(obj.properties).reduce((acc, key) => {
@@ -62,6 +74,13 @@ const flattenObject = (obj: any, content: any, parentKey: string): any => {
   }
 };
 
+/**
+ * Flattens an array schema by recursively extracting its items into a flat key-value structure.
+ * @param obj The array schema to be flattened.
+ * @param content The content corresponding to the array schema.
+ * @param parentKey The parent key of the current array schema (used for building nested keys).
+ * @returns A flat key-value structure representing the flattened array schema.
+ */
 const flattenArray = (obj: any, content: any, parentKey: string): any => {
   return content.reduce((acc: any, item: any, index: number) => {
     const currentKey = `${parentKey}/${index}`;
@@ -72,32 +91,57 @@ const flattenArray = (obj: any, content: any, parentKey: string): any => {
   }, {});
 };
 
+/**
+ * Computes default values for content based on the provided schema, handling nested structures.
+ * @param schema The schema object defining the structure of the content.
+ * @param content The content to which default values should be applied.
+ * @returns A flat key-value structure representing the default values for the content.
+ */
 export const contentDefaultValues = (schema: any, content: any): any => {
   if (!schema.properties) {
     return;
   }
-  const computedSchema = schemaResolve(schema, schema);
 
-  const flatted = flattenObject(computedSchema, content, "");
+  const flatted = flattenObject(schema, content, "");
   return flatted;
 };
 
-export const groupKeys = (obj: Record<string, any>): any => {
+/**
+ * Groups a flat key-value structure into nested objects based on the keys.
+ * @param obj The flat key-value structure to be grouped.
+ * @param schema The initial schema object used to determine the types of values.
+ * @returns An object with nested structures based on the keys of the input object.
+ */
+export const groupKeys = (obj: Record<string, any>, schema: any): any => {
   const result = {};
+  if (!schema.properties) {
+    return;
+  }
+  const properties = schema.properties;
 
   Object.keys(obj).forEach((key) => {
     const parts = key.split("/");
     let currentObj: { [k: string]: any } = result;
+    let currentSchema = properties[parts[0]];
 
     parts.forEach((part: string, index) => {
       if (index === parts.length - 1) {
+        if(currentSchema.type === "integer"){
+          obj[key] = parseInt(obj[key]);
+        } else if(currentSchema.type === "number"){
+          obj[key] = parseFloat(obj[key]);
+        }
+
         currentObj[part] = obj[key];
+        
       } else {
         if (parts[index + 1].match(/^\d+$/)) {
+          currentSchema = currentSchema.items;
           if (!currentObj[part]) {
             currentObj[part] = [];
           }
         } else {
+          currentSchema = currentSchema.properties[parts[index + 1]];
           if (!currentObj[part]) {
             currentObj[part] = {};
           }
