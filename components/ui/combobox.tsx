@@ -1,15 +1,18 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from 'next/navigation'
 import { Check, ChevronsUpDown } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandEmpty,
+  /* CommandEmpty, */
   CommandGroup,
-  CommandInput,
+  /* CommandInput, */
   CommandItem,
 } from "@/components/ui/command";
 import {
@@ -17,26 +20,59 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Icons } from "../Icons";
+import {
+  DeviceContext,
+  DeviceConfigListContext,
+} from "@/components/ContextDevice";
 
-const devices = [
-  {
-    value: "onboard",
-    label: "ONBOARD",
-    connection: "good",
-    icon: <Icons.onboard className="h-8 w-8" />,
-  },
-  {
-    value: "handcart",
-    label: "HANDCART",
-    connection: "fail",
-    icon: <Icons.handcart className="h-6 w-6" />,
-  },
-];
+import type { Device } from "@/types/devices";
 
 export function ComboboxDemo() {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
+  const [devices, setDevices] = React.useState<Device[] | null>(null);
+  const { device, setDevice } = React.useContext(DeviceContext);
+  const { deviceConfigList, setDeviceConfigList } = React.useContext(
+    DeviceConfigListContext
+  );
+  const router = useRouter();
+
+  const devicesListQuery = useQuery({
+    queryKey: ["devices"],
+    queryFn: async () => {
+      const response = await axios.get("/api/devices");
+      return response.data;
+    },
+  });
+
+  const deviceConfigListQuery = useQuery({
+    queryKey: ["deviceConfig", device?.deviceId],
+    queryFn: async () => {
+      const response = await axios.get(
+        `/api/configurations/list/${device?.vehicleId}/${device?.deviceId}`
+      );
+      return response.data;
+    },
+    enabled: !!device,
+  });
+
+  React.useEffect(() => {
+    if (devicesListQuery.data && devicesListQuery.isSuccess) {
+      setDevices(devicesListQuery.data);
+      setValue(devicesListQuery.data[0].deviceId);
+      setDevice(devicesListQuery.data[0]);
+    }
+  }, [devicesListQuery.data, devicesListQuery.isSuccess, setDevice]);
+
+  React.useEffect(() => {
+    if (deviceConfigListQuery.data && deviceConfigListQuery.isSuccess) {
+      setDeviceConfigList(deviceConfigListQuery.data);
+    }
+  }, [
+    deviceConfigListQuery.data,
+    deviceConfigListQuery.isSuccess,
+    setDeviceConfigList,
+  ]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -45,48 +81,41 @@ export function ComboboxDemo() {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-[200px] justify-between capitalize"
         >
-          {value ? (
-            <span className="flex gap-2 items-center font-semibold">
-              {devices.find((framework) => framework.value === value)?.icon}
+          {value && devices
+            ? devices.find((device: Device) => device.deviceId === value)
+                ?.deviceId
+            : "Select device..."}
 
-              {devices.find((framework) => framework.value === value)?.label}
-              {devices.find((framework) => framework.value === value)
-                ?.connection === "good" ? (
-                <div className="bg-green-600 rounded-full w-2 h-2"></div>
-              ) : (
-                <div className="bg-red-600 rounded-full w-2 h-2"></div>
-                // <Icons.X className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              )}
-            </span>
-          ) : (
-            "Select device..."
-          )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search device..." />
-          <CommandEmpty>No device found.</CommandEmpty>
+          {/* <CommandInput placeholder="Search device..." /> */}
+          {/* <CommandEmpty>No device found.</CommandEmpty> */}
           <CommandGroup>
-            {devices.map((device) => (
+            {devices?.map((deviceItem: Device) => (
               <CommandItem
-                key={device.value}
-                value={device.value}
+                key={deviceItem.deviceId}
+                value={deviceItem.deviceId}
                 onSelect={(currentValue) => {
-                  setValue(currentValue === value ? "" : currentValue);
+                  setValue(currentValue);
+                  setDevice(deviceItem);
+                  router.replace("/");
                   setOpen(false);
                 }}
               >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    value === device.value ? "opacity-100" : "opacity-0"
+                    value === deviceItem.deviceId ? "opacity-100" : "opacity-0"
                   )}
                 />
-                <span className="font-semibold">{device.label}</span>
+                <span className="font-semibold capitalize">
+                  {deviceItem.deviceId}
+                </span>
               </CommandItem>
             ))}
           </CommandGroup>

@@ -26,22 +26,17 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { ConfigHandler } from "@/components/ConfigHandler";
-import { Button } from "./ui/button";
+import { DeviceContext } from "@/components/ContextDevice";
+import { Button } from "@/components/ui/button";
 
-const Render = ({
-  vehicleId,
-  deviceId,
-  configurationId,
-}: {
-  vehicleId: string;
-  deviceId: string;
-  configurationId: string;
-}) => {
+const Render = ({ configurationId }: { configurationId: string }) => {
   const [schema, setSchema] = React.useState<any>({});
   const [content, setContent] = React.useState<any>({});
   const [lastModified, setLastModified] = React.useState<number>(
     new Date().getTime()
   );
+  const { device } = React.useContext(DeviceContext);
+
   const form = useForm({
     defaultValues: contentDefaultValues(schema, content),
   });
@@ -51,10 +46,11 @@ const Render = ({
     queryKey: [configurationId, "content"],
     queryFn: async () => {
       const response = await axios.get(
-        `/api/configurations/content/${vehicleId}/${deviceId}/${configurationId}`
+        `/api/configurations/content/${device?.vehicleId}/${device?.deviceId}/${configurationId}`
       );
       return response;
     },
+    enabled: !!device,
   });
 
   const configSchema = useQuery({
@@ -65,15 +61,20 @@ const Render = ({
       );
       return response;
     },
-    enabled: !!configContent.data,
+    enabled: !!configContent.data && !! device,
   });
 
   const lastModifiedQuery = useQuery({
-    queryKey: ["lastModified", vehicleId, deviceId, configurationId],
+    queryKey: [
+      "lastModified",
+      device?.vehicleId,
+      device?.deviceId,
+      configurationId,
+    ],
     refetchInterval: 5000,
     queryFn: async () => {
       const response = await axios.head(
-        `/api/configurations/content/${vehicleId}/${deviceId}/${configurationId}`
+        `/api/configurations/content/${device?.vehicleId}/${device?.deviceId}/${configurationId}`
       );
       return response;
     },
@@ -84,7 +85,7 @@ const Render = ({
     mutationFn: async (values: any) => {
       toastId = toast.loading("Saving configuration...");
       const response = await axios.post(
-        `/api/configurations/content/${vehicleId}/${deviceId}/${configurationId}`,
+        `/api/configurations/content/${device?.vehicleId}/${device?.deviceId}/${configurationId}`,
         {
           configurationVersionHash:
             configContent.data?.data.configurationVersionHash,
@@ -118,13 +119,13 @@ const Render = ({
   }, [configContent]);
 
   useEffect(() => {
-    if (configSchema.data && configSchema.isSuccess) {
-      setSchema(schemaResolve(configSchema.data.data, configSchema.data.data));
-      setLastModified(new Date().getTime());
-    }
     if (configContent.data && configContent.isSuccess) {
       setContent(configContent.data.data.content);
       form.reset(contentDefaultValues(schema, configContent.data.data.content));
+    }
+    if (configSchema.data && configSchema.isSuccess) {
+      setSchema(schemaResolve(configSchema.data.data, configSchema.data.data));
+      setLastModified(new Date().getTime());
     }
   }, [
     configSchema.data,

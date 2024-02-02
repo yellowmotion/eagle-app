@@ -1,5 +1,5 @@
 "use client";
-
+import * as React from "react";
 import Link from "next/link";
 import { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/UserAvatar";
+import { DeviceConfigListContext } from "@/components/ContextDevice";
 
 export interface UserAccountNavProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -22,13 +23,15 @@ export interface UserAccountNavProps
 
 export function UserAccountNav({ user }: UserAccountNavProps) {
   const session = useSession();
+  const { deviceConfigList } = React.useContext(DeviceConfigListContext);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
         <UserAvatar
           user={{
-            name: user.name || undefined,
-            image: user.image || undefined,
+            name: user.name ?? undefined,
+            image: user.image ?? undefined,
           }}
           className="h-10 w-10"
         />
@@ -54,7 +57,15 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
 
         {session.data?.user.role && session.data?.user.role <= ROLE.HW && (
           <DropdownMenuItem asChild>
-            <Link href="/config">Configurazioni</Link>
+            <Link
+              href={`/config/${
+                deviceConfigList && deviceConfigList.length > 0
+                  ? deviceConfigList[deviceConfigList.length - 1]
+                  : ""
+              }`}
+            >
+              Configurazioni
+            </Link>
           </DropdownMenuItem>
         )}
         {session.data?.user.role &&

@@ -4,6 +4,8 @@ import { SessionProvider } from "next-auth/react";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 
+import ContextDevice from "@/components/ContextDevice";
+
 const ReactQueryDevtoolsProduction = React.lazy(() =>
   import("@tanstack/react-query-devtools/build/modern/production.js").then(
     (d) => ({
@@ -21,11 +23,13 @@ const queryClient = new QueryClient();
 const Providers: FC<LayoutProps> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Toaster />
-      <SessionProvider>{children}</SessionProvider>
-      <React.Suspense fallback={null}>
-        {/* <ReactQueryDevtoolsProduction /> */}
-      </React.Suspense>
+      <ContextDevice>
+        <Toaster />
+        <SessionProvider>{children}</SessionProvider>
+        <React.Suspense fallback={null}>
+          {/* <ReactQueryDevtoolsProduction /> */}
+        </React.Suspense>
+      </ContextDevice>
     </QueryClientProvider>
   );
 };
