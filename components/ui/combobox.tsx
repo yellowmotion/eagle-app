@@ -1,18 +1,19 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from 'next/navigation'
-import { Check, ChevronsUpDown } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import axios from "axios";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { Check, ChevronsUpDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  /* CommandEmpty, */
+  CommandEmpty,
   CommandGroup,
-  /* CommandInput, */
+  CommandInput,
   CommandItem,
 } from "@/components/ui/command";
 import {
@@ -24,10 +25,24 @@ import {
   DeviceContext,
   DeviceConfigListContext,
 } from "@/components/ContextDevice";
+import { Separator } from "@/components/ui/separator";
+import { Icons } from "@/components/Icons";
 
 import type { Device } from "@/types/devices";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./alert-dialog";
 
 export function ComboboxDemo() {
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
   const [devices, setDevices] = React.useState<Device[] | null>(null);
@@ -35,7 +50,7 @@ export function ComboboxDemo() {
   const { deviceConfigList, setDeviceConfigList } = React.useContext(
     DeviceConfigListContext
   );
-  const router = useRouter();
+  let toastId: string;
 
   const devicesListQuery = useQuery({
     queryKey: ["devices"],
@@ -46,7 +61,7 @@ export function ComboboxDemo() {
   });
 
   const deviceConfigListQuery = useQuery({
-    queryKey: ["deviceConfig", device?.deviceId],
+    queryKey: ["deviceConfig", device?.vehicleId, device?.deviceId],
     queryFn: async () => {
       const response = await axios.get(
         `/api/configurations/list/${device?.vehicleId}/${device?.deviceId}`
@@ -56,8 +71,31 @@ export function ComboboxDemo() {
     enabled: !!device,
   });
 
+  const deleteDeviceMutation = useMutation({
+    mutationKey: ["deleteDevice"],
+    mutationFn: async (deleteDevice: Device) => {
+      toastId = toast.loading("Deleting device...");
+      const response = await axios.delete(
+        `/api/devices/${deleteDevice.vehicleId}/${deleteDevice.deviceId}`
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.dismiss(toastId);
+      toast.success("Device deleted successfully.");
+      setOpen(false);
+    },
+    onError: () => {
+      toast.dismiss(toastId);
+      toast.error("Failed to delete device.");
+    },
+  });
+
   React.useEffect(() => {
     if (devicesListQuery.data && devicesListQuery.isSuccess) {
+      devicesListQuery.data.sort((a: Device, b: Device) =>
+        a.fixed === b.fixed ? 0 : a.fixed ? -1 : 1
+      );
       setDevices(devicesListQuery.data);
       setValue(devicesListQuery.data[0].deviceId);
       setDevice(devicesListQuery.data[0]);
@@ -93,31 +131,87 @@ export function ComboboxDemo() {
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          {/* <CommandInput placeholder="Search device..." /> */}
-          {/* <CommandEmpty>No device found.</CommandEmpty> */}
+          <CommandInput placeholder="Add a device" />
+          <CommandEmpty>No device found.</CommandEmpty>
           <CommandGroup>
-            {devices?.map((deviceItem: Device) => (
-              <CommandItem
-                key={deviceItem.deviceId}
-                value={deviceItem.deviceId}
-                onSelect={(currentValue) => {
-                  setValue(currentValue);
-                  setDevice(deviceItem);
-                  router.replace("/");
-                  setOpen(false);
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === deviceItem.deviceId ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                <span className="font-semibold capitalize">
-                  {deviceItem.deviceId}
-                </span>
-              </CommandItem>
-            ))}
+            {devices?.map(
+              (deviceItem: Device, index: number, array: Device[]) => (
+                <>
+                  <CommandItem
+                    key={deviceItem.deviceId}
+                    value={deviceItem.deviceId}
+                    onSelect={(currentValue) => {
+                      setValue(currentValue);
+                      setDevice(deviceItem);
+                      router.replace("/");
+                      setOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === deviceItem.deviceId
+                          ? "opacity-100"
+                          : "opacity-0"
+                      )}
+                    />
+                    <div className="w-full flex justify-between items-center">
+                      <div className="flex flex-col items-start">
+                        <span className="font-semibold capitalize">
+                          {deviceItem.deviceId}
+                        </span>
+                        <span className="text-xs capitalize text-gray-700 dark:text-white/60">
+                          {deviceItem.vehicleId}
+                        </span>
+                      </div>
+                      {!deviceItem.fixed && (
+                        <>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="destructive"
+                                className="w-8 h-8 p-1"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
+                              >
+                                <Icons.trash className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Are you absolutely sure?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will
+                                  permanently delete this device.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={() => {
+                                    deleteDeviceMutation.mutate(deviceItem);
+                                    devicesListQuery.refetch();
+                                  }}
+                                >
+                                  Continue
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </>
+                      )}
+                    </div>
+                  </CommandItem>
+                  {index <= array.length - 2 &&
+                    deviceItem.fixed &&
+                    !array[index + 1].fixed && <Separator />}
+                </>
+              )
+            )}
           </CommandGroup>
         </Command>
       </PopoverContent>

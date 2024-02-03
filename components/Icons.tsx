@@ -1,4 +1,4 @@
-import { LucideProps, BaggageClaim, RefreshCcw, UploadCloud, User, Bell } from "lucide-react";
+import { LucideProps, BaggageClaim, RefreshCcw, UploadCloud, User, Bell, Trash2 } from "lucide-react";
 
 export const Icons = {
   eagle_inverted: (props: LucideProps) => (
@@ -1321,4 +1321,5 @@ export const Icons = {
   upload: UploadCloud,
   user: User,
   bell: Bell,
+  trash: Trash2,
 };
