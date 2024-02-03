@@ -10,6 +10,16 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
   Command,
   CommandEmpty,
   CommandGroup,
@@ -41,9 +51,19 @@ import {
   AlertDialogTrigger,
 } from "./alert-dialog";
 
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
+const formSchema = z.object({
+  vehicleId: z.string().min(2).max(50),
+  deviceId: z.string().min(2).max(50),
+});
+
 export function ComboboxDemo() {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
+  const [openAlert, setOpenAlert] = React.useState(false);
   const [value, setValue] = React.useState("");
   const [devices, setDevices] = React.useState<Device[] | null>(null);
   const { device, setDevice } = React.useContext(DeviceContext);
@@ -51,6 +71,21 @@ export function ComboboxDemo() {
     DeviceConfigListContext
   );
   let toastId: string;
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      vehicleId: "",
+      deviceId: "",
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    addDeviceMutation.mutate(values);
+    setOpenAlert(!openAlert);
+    devicesListQuery.refetch();
+    setDevices(devicesListQuery.data);
+  }
 
   const devicesListQuery = useQuery({
     queryKey: ["devices"],
@@ -88,6 +123,23 @@ export function ComboboxDemo() {
     onError: () => {
       toast.dismiss(toastId);
       toast.error("Failed to delete device.");
+    },
+  });
+
+  const addDeviceMutation = useMutation({
+    mutationKey: ["addDevice"],
+    mutationFn: async (values: z.infer<typeof formSchema>) => {
+      toastId = toast.loading("Adding device...");
+      const response = await axios.put(`/api/devices`, values);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.dismiss(toastId);
+      toast.success("Device added successfully.");
+    },
+    onError: () => {
+      toast.dismiss(toastId);
+      toast.error("Failed to add device.");
     },
   });
 
@@ -131,8 +183,82 @@ export function ComboboxDemo() {
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Add a device" />
-          <CommandEmpty>No device found.</CommandEmpty>
+          <AlertDialog open={openAlert}>
+            <AlertDialogTrigger
+              asChild
+              onClick={() => {
+                setOpenAlert(!openAlert);
+              }}
+            >
+              <Button
+                variant="ghost"
+                className="m-1 px-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <span className="flex items-center gap-2">
+                  <Icons.plus className="h-4 w-4" />
+                  Aggiungi dispositivo
+                </span>
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Add device information</AlertDialogTitle>
+                <AlertDialogDescription>
+                  <Form {...form}>
+                    <form
+                      onSubmit={form.handleSubmit(onSubmit)}
+                      className="space-y-2"
+                    >
+                      <FormField
+                        control={form.control}
+                        name="vehicleId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Vehicle ID</FormLabel>
+                            <FormControl>
+                              <Input placeholder="vehicleId" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="deviceId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Device ID</FormLabel>
+                            <FormControl>
+                              <Input placeholder="deviceId" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <AlertDialogFooter className="pt-4">
+                        <AlertDialogCancel
+                          onClick={() => {
+                            setOpenAlert(!openAlert);
+                          }}
+                        >
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction type="submit">
+                          Continue
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </form>
+                  </Form>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <Separator />
+
           <CommandGroup>
             {devices?.map(
               (deviceItem: Device, index: number, array: Device[]) => (
@@ -165,44 +291,42 @@ export function ComboboxDemo() {
                         </span>
                       </div>
                       {!deviceItem.fixed && (
-                        <>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="destructive"
-                                className="w-8 h-8 p-1"
-                                onClick={(e) => {
-                                  e.stopPropagation();
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              className="w-8 h-8 p-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                            >
+                              <Icons.trash className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Are you absolutely sure?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will
+                                permanently delete this device.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => {
+                                  deleteDeviceMutation.mutate(deviceItem);
+                                  devicesListQuery.refetch();
                                 }}
                               >
-                                <Icons.trash className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Are you absolutely sure?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This action cannot be undone. This will
-                                  permanently delete this device.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  onClick={() => {
-                                    deleteDeviceMutation.mutate(deviceItem);
-                                    devicesListQuery.refetch();
-                                  }}
-                                >
-                                  Continue
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </>
+                                Continue
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       )}
                     </div>
                   </CommandItem>
