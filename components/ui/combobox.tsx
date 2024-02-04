@@ -225,7 +225,7 @@ export function ComboboxDemo() {
                           <FormItem>
                             <FormLabel>Vehicle ID</FormLabel>
                             <FormControl>
-                              <Input placeholder="vehicleId" {...field} />
+                              <Input placeholder="vehicleId" {...field} className="text-base"/>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -238,7 +238,7 @@ export function ComboboxDemo() {
                           <FormItem>
                             <FormLabel>Device ID</FormLabel>
                             <FormControl>
-                              <Input placeholder="deviceId" {...field} />
+                              <Input placeholder="deviceId" {...field} className="text-base"/>
                             </FormControl>
                             <FormMessage />
                           </FormItem>

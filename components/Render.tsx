@@ -185,13 +185,13 @@ const Render = ({ configurationId }: { configurationId: string }) => {
   ]);
 
   function onSubmit(values: any) {
-    if (form.formState.isDirty) {
+    // if (form.formState.isDirty) {
       mutation.mutate(groupKeys(values, schema));
-    } else {
-      toast("No changes made", {
-        icon: "✏️",
-      });
-    }
+    // } else {
+    //   toast("No changes made", {
+    //     icon: "✏️",
+    //   });
+    // }
   }
 
   const render = (configSchema: any, configContent: any, key: string) => {
