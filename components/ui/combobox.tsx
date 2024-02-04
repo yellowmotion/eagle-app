@@ -83,6 +83,7 @@ export function ComboboxDemo() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     addDeviceMutation.mutate(values);
     setOpenAlert(!openAlert);
+    form.reset();
     devicesListQuery.refetch();
     setDevices(devicesListQuery.data);
   }
@@ -149,7 +150,9 @@ export function ComboboxDemo() {
         a.fixed === b.fixed ? 0 : a.fixed ? -1 : 1
       );
       setDevices(devicesListQuery.data);
-      setValue(devicesListQuery.data[0].deviceId);
+      setValue(
+        `${devicesListQuery.data[0].vehicleId}/${devicesListQuery.data[0].deviceId}/${devicesListQuery.data[0].owner}`
+      );
       setDevice(devicesListQuery.data[0]);
     }
   }, [devicesListQuery.data, devicesListQuery.isSuccess, setDevice]);
@@ -174,8 +177,11 @@ export function ComboboxDemo() {
           className="w-[200px] justify-between capitalize"
         >
           {value && devices
-            ? devices.find((device: Device) => device.deviceId === value)
-                ?.deviceId
+            ? devices.find(
+                (device: Device) =>
+                  `${device.vehicleId}/${device.deviceId}/${device.owner}` ===
+                  value
+              )?.deviceId
             : "Select device..."}
 
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -219,7 +225,7 @@ export function ComboboxDemo() {
                           <FormItem>
                             <FormLabel>Vehicle ID</FormLabel>
                             <FormControl>
-                              <Input placeholder="vehicleId" {...field} />
+                              <Input placeholder="vehicleId" {...field} className="text-base"/>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -232,7 +238,7 @@ export function ComboboxDemo() {
                           <FormItem>
                             <FormLabel>Device ID</FormLabel>
                             <FormControl>
-                              <Input placeholder="deviceId" {...field} />
+                              <Input placeholder="deviceId" {...field} className="text-base"/>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -265,7 +271,7 @@ export function ComboboxDemo() {
                 <>
                   <CommandItem
                     key={deviceItem.deviceId}
-                    value={deviceItem.deviceId}
+                    value={`${deviceItem.vehicleId}/${deviceItem.deviceId}/${deviceItem.owner}`}
                     onSelect={(currentValue) => {
                       setValue(currentValue);
                       setDevice(deviceItem);
@@ -276,7 +282,8 @@ export function ComboboxDemo() {
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        value === deviceItem.deviceId
+                        value ===
+                          `${deviceItem.vehicleId}/${deviceItem.deviceId}/${deviceItem.owner}`
                           ? "opacity-100"
                           : "opacity-0"
                       )}
