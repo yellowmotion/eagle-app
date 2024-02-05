@@ -135,7 +135,7 @@ export const groupKeys = (obj: Record<string, any>, schema: any): any => {
         currentObj[part] = obj[key];
         
       } else {
-        if (parts[index + 1].match(/^\d+$/)) {
+        if (RegExp(/^\d+$/).exec(parts[index + 1])) {
           currentSchema = currentSchema.items;
           if (!currentObj[part]) {
             currentObj[part] = [];

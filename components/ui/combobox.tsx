@@ -179,7 +179,7 @@ export function ComboboxDemo() {
           {value && devices
             ? devices.find(
                 (device: Device) =>
-                  `${device.vehicleId}/${device.deviceId}/${device.owner}` ===
+                  `${device.vehicleId.toLowerCase()}/${device.deviceId.toLowerCase()}/${device.owner.toLowerCase()}` ===
                   value
               )?.deviceId
             : "Select device..."}
@@ -225,7 +225,11 @@ export function ComboboxDemo() {
                           <FormItem>
                             <FormLabel>Vehicle ID</FormLabel>
                             <FormControl>
-                              <Input placeholder="vehicleId" {...field} className="text-base"/>
+                              <Input
+                                placeholder="vehicleId"
+                                {...field}
+                                className="text-base"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -238,7 +242,11 @@ export function ComboboxDemo() {
                           <FormItem>
                             <FormLabel>Device ID</FormLabel>
                             <FormControl>
-                              <Input placeholder="deviceId" {...field} className="text-base"/>
+                              <Input
+                                placeholder="deviceId"
+                                {...field}
+                                className="text-base"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
